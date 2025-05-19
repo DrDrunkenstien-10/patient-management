@@ -8,12 +8,12 @@ CREATE SCHEMA IF NOT EXISTS staff;
 -- Enums (must not use DO $$ in data.sql)
 -- Manually check and ensure enums exist before app start
 
-CREATE TYPE admin.system_admin_role AS ENUM ('system_admin');
-CREATE TYPE admin.admin_access_level AS ENUM ('admin');
+-- CREATE TYPE admin.system_admin_role AS ENUM ('system_admin');
+-- CREATE TYPE admin.admin_access_level AS ENUM ('admin');
 
-CREATE TYPE staff.gender_enum AS ENUM ('M', 'F', 'O');
-CREATE TYPE staff.receptionist_access_level AS ENUM ('READ_ONLY', 'SCHEDULING', 'BILLING', 'ADMIN');
-CREATE TYPE staff.receptionist_status AS ENUM ('ACTIVE', 'INACTIVE', 'TERMINATED');
+-- CREATE TYPE staff.gender_enum AS ENUM ('M', 'F', 'O');
+-- CREATE TYPE staff.receptionist_access_level AS ENUM ('READ_ONLY', 'SCHEDULING', 'BILLING', 'ADMIN');
+-- CREATE TYPE staff.receptionist_status AS ENUM ('ACTIVE', 'INACTIVE', 'TERMINATED');
 
 -- Tables
 

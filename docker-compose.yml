@@ -142,7 +142,7 @@ services:
         context: ./admin-service
       container_name: admin-service
       depends_on:
-        - postgres
+        - admin-postgres
       environment:
         SPRING_DATASOURCE_URL: jdbc:postgresql://admin-service-db:5432/admin_service_db
         SPRING_DATASOURCE_USERNAME: admin_user
