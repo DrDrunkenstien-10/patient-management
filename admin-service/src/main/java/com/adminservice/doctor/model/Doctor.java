@@ -51,8 +51,7 @@ public class Doctor {
     @Column(name = "role_code")
     private String roleCode;
 
-    
-
+    // Getters and setters
     public UUID getDoctorId() {
         return doctorId;
     }
@@ -148,6 +147,4 @@ public class Doctor {
     public void setRoleCode(String roleCode) {
         this.roleCode = roleCode;
     }
-
-    
 }

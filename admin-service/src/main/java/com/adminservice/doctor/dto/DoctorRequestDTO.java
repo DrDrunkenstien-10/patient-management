@@ -7,49 +7,49 @@ import com.adminservice.doctor.enums.Gender;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-
 
 public class DoctorRequestDTO {
 
     private UUID doctorId;
 
     @NotBlank(message = "Name is required")
-    @Size(max = 100 , message = "name cannot exceed 100 characters")
+    @Size(max = 100, message = "Name cannot exceed 100 characters")
     private String name;
-    
-    @NotBlank(message = "Gender is required")
+
+    @NotNull(message = "Gender is required")
     private Gender gender;
 
-    @NotBlank(message = "Date of Birth is required")
+    @NotNull(message = "Date of Birth is required")
     private LocalDate dateOfBirth;
 
-    @NotBlank(message = "qualification is required")
+    @NotBlank(message = "Qualification is required")
     private String qualification;
 
-    @NotBlank(message = "specialization is required")
+    @NotBlank(message = "Specialization is required")
     private String specialization;
 
-    @NotBlank(message = "license number is required")
+    @NotBlank(message = "License number is required")
     private String licenseNumber;
 
-    @NotBlank(message = "affiliated hospital is required")
+    @NotBlank(message = "Affiliated hospital is required")
     private String affiliatedHospital;
 
     @NotBlank(message = "Email is required")
-    @Email(message = "Email should be validate")
+    @Email(message = "Email should be valid")
     private String contactEmail;
 
-    @NotBlank(message = "contact number is required")
-    @Size(max=10, message = "cannot exceed 10 digits")
+    @NotBlank(message = "Contact number is required")
+    @Size(max = 10, message = "Contact number cannot exceed 10 digits")
     private String contactPhone;
 
-    @NotBlank(message = "praction location is required")
-    private String practiceLocation;    
-    
+    @NotBlank(message = "Practice location is required")
+    private String practiceLocation;
+
     private String roleCode;
 
-    // Getters and Setters 
+    // Getters and Setters
 
     public UUID getDoctorId() {
         return doctorId;
@@ -146,7 +146,5 @@ public class DoctorRequestDTO {
     public void setRoleCode(String roleCode) {
         this.roleCode = roleCode;
     }
-    
-    
-    
+
 }
