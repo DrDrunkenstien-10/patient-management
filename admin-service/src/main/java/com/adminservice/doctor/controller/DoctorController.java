@@ -49,10 +49,10 @@ public class DoctorController {
         DoctorResponseDTO doctorResponseDTO = doctorService.updateDoctor(doctorId, doctorRequestDTO);
         return ResponseEntity.ok().body(doctorResponseDTO);
     }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteDoctor(@PathVariable("id") UUID id) {
         doctorService.deleteDoctor(id);
         return ResponseEntity.ok("Doctor deleted successfully");
     }
-
 }
