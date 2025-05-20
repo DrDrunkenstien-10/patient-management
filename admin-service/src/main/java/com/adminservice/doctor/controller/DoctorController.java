@@ -14,6 +14,7 @@ import com.adminservice.doctor.dto.DoctorResponseDTO;
 import com.adminservice.doctor.service.DoctorService;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -48,4 +49,10 @@ public class DoctorController {
         DoctorResponseDTO doctorResponseDTO = doctorService.updateDoctor(doctorId, doctorRequestDTO);
         return ResponseEntity.ok().body(doctorResponseDTO);
     }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteDoctor(@PathVariable("id") UUID id) {
+        doctorService.deleteDoctor(id);
+        return ResponseEntity.ok("Doctor deleted successfully");
+    }
+
 }

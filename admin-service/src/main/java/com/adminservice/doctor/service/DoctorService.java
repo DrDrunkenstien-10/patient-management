@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.adminservice.doctor.dto.DoctorRequestDTO;
 import com.adminservice.doctor.dto.DoctorResponseDTO;
@@ -63,4 +64,13 @@ public class DoctorService {
 
         return DoctorMapper.toDto(updatedDoctor);
     }
+    @Transactional
+public void deleteDoctor(UUID id) {
+    if (!doctorRepository.existsById(id)) {
+        throw new IllegalArgumentException("Doctor with ID " + id + " does not exist");
+    }
+    doctorRepository.deleteById(id);
+}
+
+
 }
