@@ -12,4 +12,7 @@ public interface ReceptionistRepository extends JpaRepository<Receptionist, UUID
     boolean existsByContactEmail(String contactEmail);
 
     boolean existsByContactPhone(String contactPhone);
+    boolean existsByContactEmailAndReceptionistIdNot(String contactEmail, UUID receptionistId);
+
+    boolean existsByContactPhoneAndReceptionistIdNot(String contactPhone, UUID receptionistId);
 }

@@ -1,5 +1,7 @@
 package com.adminservice.receptionist.validator;
 
+import java.util.UUID;
+
 import org.springframework.stereotype.Component;
 
 import com.adminservice.receptionist.dto.ReceptionistRequestDTO;
@@ -35,4 +37,19 @@ public class ReceptionistValidator {
                             + receptionistRequestDTO.getContactPhone());
         }
     }
+
+    public void validateForUpdate(ReceptionistRequestDTO receptionistRequestDTO, UUID receptionistId) {
+        if (receptionistRepository.existsByContactEmailAndReceptionistIdNot(receptionistRequestDTO.getContactEmail(),
+                receptionistId)) {
+            throw new EmailAlreadyExistsException(
+                    "Receptionist with this email already exist :" + receptionistRequestDTO.getContactEmail());
+        }
+
+        if (receptionistRepository.existsByContactPhoneAndReceptionistIdNot(receptionistRequestDTO.getContactPhone(),
+                receptionistId)) {
+            throw new ContactPhoneAlreadyExistsException(
+                    "Receptionist with this contact phone already exist" + receptionistRequestDTO.getContactPhone());
+        }
+    }
+
 }

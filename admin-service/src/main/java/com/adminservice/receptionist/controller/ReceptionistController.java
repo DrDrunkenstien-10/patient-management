@@ -13,9 +13,19 @@ import com.adminservice.receptionist.dto.ReceptionistRequestDTO;
 import com.adminservice.receptionist.dto.ReceptionistResponseDTO;
 import com.adminservice.receptionist.service.ReceptionistService;
 
+import jakarta.validation.groups.Default;
+
+import org.springframework.web.bind.annotation.PutMapping;
+import java.util.UUID;
+
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
 @RestController
 @RequestMapping("/receptionists")
 public class ReceptionistController {
+
     private final ReceptionistService receptionistService;
 
     public ReceptionistController(ReceptionistService receptionistService) {
@@ -35,5 +45,20 @@ public class ReceptionistController {
         List<ReceptionistResponseDTO> receptionistResponseDTOs = receptionistService.
                 getReceptionists();
         return ResponseEntity.ok().body(receptionistResponseDTOs);
+
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<ReceptionistResponseDTO> updateReceptionist(@PathVariable("id") UUID receptionistId,
+            @Validated({ Default.class }) @RequestBody ReceptionistRequestDTO receptionistRequestDTO) {
+        ReceptionistResponseDTO updatedReceptionist = receptionistService.updateReceptionist(receptionistId,
+                receptionistRequestDTO);
+        return ResponseEntity.ok().body(updatedReceptionist);
+    }
+
+    @DeleteMapping("{id}")
+    public ResponseEntity<String> deleteReceptionist(@PathVariable("id") UUID receptionistId) {
+        receptionistService.deleteReceptionist(receptionistId);
+        return ResponseEntity.ok("Receptionist deleted successfully");
     }
 }
