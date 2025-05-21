@@ -11,6 +11,8 @@ import com.adminservice.systemadmin.mapper.SystemAdminMapper;
 import com.adminservice.systemadmin.model.SystemAdmin;
 import com.adminservice.systemadmin.repository.SystemAdminRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class SystemAdminService {
     private final SystemAdminRepository systemAdminRepository;
@@ -31,5 +33,13 @@ public class SystemAdminService {
         SystemAdmin updatedSystemAdmin = systemAdminRepository.save(systemAdmin);
 
         return SystemAdminMapper.toDto(updatedSystemAdmin);
+    }
+    
+    @Transactional
+    public void deleteSystemAdminById(UUID systemAdminId) {
+        SystemAdmin systemAdmin = systemAdminRepository.findById(systemAdminId)
+                .orElseThrow(() -> new SystemAdminNotFoundException(
+                        "System Admin not found with ID: " + systemAdminId));
+        systemAdminRepository.delete(systemAdmin);
     }
 }
