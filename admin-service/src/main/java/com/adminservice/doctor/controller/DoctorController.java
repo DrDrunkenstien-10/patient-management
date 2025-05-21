@@ -51,8 +51,8 @@ public class DoctorController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteDoctor(@PathVariable("id") UUID id) {
-        doctorService.deleteDoctor(id);
+    public ResponseEntity<String> deleteDoctor(@PathVariable("id") UUID doctorId) {
+        doctorService.deleteDoctor(doctorId);
         return ResponseEntity.ok("Doctor deleted successfully");
     }
 }

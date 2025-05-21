@@ -64,13 +64,13 @@ public class DoctorService {
 
         return DoctorMapper.toDto(updatedDoctor);
     }
-    @Transactional
-public void deleteDoctor(UUID id) {
-    if (!doctorRepository.existsById(id)) {
-        throw new IllegalArgumentException("Doctor with ID " + id + " does not exist");
-    }
-    doctorRepository.deleteById(id);
-}
 
+    @Transactional
+    public void deleteDoctor(UUID doctorId) {
+        if (!doctorRepository.existsById(doctorId)) {
+            throw new IllegalArgumentException("Doctor with ID " + doctorId + " does not exist");
+        }
+        doctorRepository.deleteById(doctorId);
+    }
 
 }
