@@ -1,6 +1,7 @@
 package com.adminservice.doctor.dto;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 
 import com.adminservice.doctor.enums.Gender;
 
@@ -18,6 +19,8 @@ public class DoctorResponseDTO {
     private String contact_phone;
     private String practice_location;
     private String role_code;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 
     // Getters and Setters
     public String getDoctorId() {
@@ -115,4 +118,22 @@ public class DoctorResponseDTO {
     public void setRole_code(String role_code) {
         this.role_code = role_code;
     }
+
+    public OffsetDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(OffsetDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public OffsetDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(OffsetDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    
 }

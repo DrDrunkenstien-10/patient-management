@@ -21,6 +21,8 @@ public class DoctorMapper {
         doctorResponseDTO.setContact_email(doctor.getContactEmail());
         doctorResponseDTO.setContact_phone(doctor.getContactPhone());
         doctorResponseDTO.setRole_code(doctor.getRoleCode());
+        doctorResponseDTO.setCreatedAt(doctor.getCreatedAt());
+        doctorResponseDTO.setUpdatedAt(doctor.getUpdatedAt());
 
         return doctorResponseDTO;
     }

@@ -63,6 +63,12 @@ public class Receptionist {
     @Column(name = "status", nullable = false)
     private ReceptionistStatus status;
 
+    @Column(name = "created_at", columnDefinition = "TIMESTAMPTZ", updatable = false)
+    private OffsetDateTime createdAt;
+
+    @Column(name = "updated_at", columnDefinition = "TIMESTAMPTZ")
+    private OffsetDateTime updatedAt;
+
     // Getters and setters
     public UUID getReceptionistId() {
         return receptionistId;
@@ -168,6 +174,22 @@ public class Receptionist {
         this.status = status;
     }
 
+    public OffsetDateTime getCreatedAt() {
+        return createdAt;
+    }
 
+    public void setCreatedAt(OffsetDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public OffsetDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(OffsetDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+     
+    
     
 }

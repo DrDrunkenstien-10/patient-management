@@ -58,8 +58,7 @@ public class DoctorService {
         doctor.setContactEmail(doctorRequestDTO.getContactEmail());
         doctor.setContactPhone(doctorRequestDTO.getContactPhone());
         doctor.setPracticeLocation(doctorRequestDTO.getPracticeLocation());
-        doctor.setRoleCode(doctorRequestDTO.getRoleCode());
-
+        doctor.setRoleCode(doctorRequestDTO.getRoleCode());    
         Doctor updatedDoctor = doctorRepository.save(doctor);
 
         return DoctorMapper.toDto(updatedDoctor);

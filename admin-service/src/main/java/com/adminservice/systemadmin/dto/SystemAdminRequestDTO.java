@@ -3,8 +3,6 @@ package com.adminservice.systemadmin.dto;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-
-
 import com.adminservice.systemadmin.enums.AdminAccessLevel;
 import com.adminservice.systemadmin.enums.SystemAdminRole;
 
@@ -24,10 +22,6 @@ public class SystemAdminRequestDTO {
     private AdminAccessLevel accessLevel;
 
     private OffsetDateTime lastLogin;
-
-    private OffsetDateTime createdAt;
-
-    private OffsetDateTime updatedAt;
 
     public UUID getSystemAdminId() {
         return systemAdminId;
@@ -68,24 +62,5 @@ public class SystemAdminRequestDTO {
     public void setLastLogin(OffsetDateTime lastLogin) {
         this.lastLogin = lastLogin;
     }
-
-    public OffsetDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(OffsetDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public OffsetDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(OffsetDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    
-
 
 }

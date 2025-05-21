@@ -7,6 +7,7 @@ import java.util.UUID;
 import com.adminservice.doctor.enums.Gender;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "doctor", schema = "staff")
@@ -50,6 +51,12 @@ public class Doctor {
 
     @Column(name = "role_code")
     private String roleCode;
+
+    @Column(name = "created_at", columnDefinition = "TIMESTAMPTZ", updatable = false)
+    private OffsetDateTime createdAt;
+
+    @Column(name = "updated_at", columnDefinition = "TIMESTAMPTZ")
+    private OffsetDateTime updatedAt;
 
     // Getters and setters
     public UUID getDoctorId() {
@@ -147,4 +154,21 @@ public class Doctor {
     public void setRoleCode(String roleCode) {
         this.roleCode = roleCode;
     }
+
+    public OffsetDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(OffsetDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public OffsetDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(OffsetDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+    
 }

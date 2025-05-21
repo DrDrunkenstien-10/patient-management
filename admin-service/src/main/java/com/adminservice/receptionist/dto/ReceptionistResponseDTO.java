@@ -21,6 +21,8 @@ public class ReceptionistResponseDTO {
     private ReceptionistAccessLevel accessLevel;
     private OffsetDateTime lastLogin;
     private ReceptionistStatus status;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 
     // Getters and setters
     public String getReceptionistId() {
@@ -126,4 +128,21 @@ public class ReceptionistResponseDTO {
     public void setStatus(ReceptionistStatus status) {
         this.status = status;
     }
+
+       public OffsetDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(OffsetDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public OffsetDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(OffsetDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+    
 }

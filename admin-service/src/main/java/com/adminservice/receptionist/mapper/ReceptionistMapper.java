@@ -21,6 +21,8 @@ public class ReceptionistMapper {
         receptionistResponseDTO.setAccessLevel(receptionist.getAccessLevel());
         receptionistResponseDTO.setLastLogin(receptionist.getLastLogin());
         receptionistResponseDTO.setStatus(receptionist.getStatus());
+        receptionistResponseDTO.setCreatedAt(receptionist.getCreatedAt());
+        receptionistResponseDTO.setUpdatedAt(receptionist.getUpdatedAt());
 
         return receptionistResponseDTO;
     }
