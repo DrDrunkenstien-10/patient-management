@@ -101,19 +101,19 @@ services:
     container_name: patient-service
     depends_on:
       - postgres
-      - billing-service
-      - kafka
+      # - billing-service
+      # - kafka
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://patient-service-db:5432/db
       SPRING_DATASOURCE_USERNAME: admin_user
       SPRING_DATASOURCE_PASSWORD: password
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_SQL_INIT_MODE: always
-      BILLING_SERVICE_ADDRESS: billing-service
-      BILLING_SERVICE_GRPC_PORT: 9001
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-    # ports:
-    #   - "4000:4000"
+      # BILLING_SERVICE_ADDRESS: billing-service
+      # BILLING_SERVICE_GRPC_PORT: 9001
+      # SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    ports:
+      - "4000:4000"
     networks:
       - internal
 

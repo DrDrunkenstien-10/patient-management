@@ -25,6 +25,27 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(errors);
     }
 
+    @ExceptionHandler(AadhaarNumberAlreadyException.class)
+    public ResponseEntity<Map<String, String>> handleAadhaarNumberAlreadyException(AadhaarNumberAlreadyException ex) {
+
+        log.warn("Aadhaar number already exists {}", ex.getMessage());
+
+        Map<String, String> errors = new HashMap<>();
+        errors.put("message", "Aadhaar number already exists");
+        return ResponseEntity.badRequest().body(errors);
+    }
+
+    @ExceptionHandler(ContactPhoneAlreadyExistsException.class)
+    public ResponseEntity<Map<String, String>> handleContactPhoneAlreadyExistsException(
+            ContactPhoneAlreadyExistsException ex) {
+
+        log.warn("Contact phone already exists {}", ex.getMessage());
+
+        Map<String, String> errors = new HashMap<>();
+        errors.put("message", "Contact phone already exists");
+        return ResponseEntity.badRequest().body(errors);
+    }
+
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ResponseEntity<Map<String, String>> handleEmailAlreadyExistsException(EmailAlreadyExistsException ex) {
 

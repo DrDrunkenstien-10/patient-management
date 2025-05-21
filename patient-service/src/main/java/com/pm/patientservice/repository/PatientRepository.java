@@ -9,7 +9,15 @@ import com.pm.patientservice.model.Patient;
 
 @Repository
 public interface PatientRepository extends JpaRepository<Patient, UUID> {
+    boolean existsByAadhaarNumber(String aadhaarNumber);
+
+    boolean existsByContactPhone(String contactPhone);
+
     boolean existsByEmail(String email);
 
-    boolean existsByEmailAndIdNot(String email, UUID id);
+    boolean existsByAadhaarNumberAndPatientIdNot(String aadhaarNumber, UUID patientId);
+
+    boolean existsByContactPhoneAndPatientIdNot(String contactPhone, UUID patientId);
+
+    boolean existsByEmailAndPatientIdNot(String email, UUID patientId);
 }

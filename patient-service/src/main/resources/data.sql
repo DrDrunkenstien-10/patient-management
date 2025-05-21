@@ -1,4 +1,4 @@
--- Enable UUID support
+CREATE EXTENSION IF NOT EXISTS plpgsql;
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- Schemas
@@ -24,16 +24,16 @@ CREATE TABLE IF NOT EXISTS patient.patient (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-   NEW.updated_at = NOW();
-   RETURN NEW;
-END;
-$$ language 'plpgsql';
+-- CREATE OR REPLACE FUNCTION update_updated_at_column()
+-- RETURNS TRIGGER AS $$
+-- BEGIN
+--    NEW.updated_at = NOW();
+--    RETURN NEW;
+-- END;
+-- $$ language 'plpgsql';
 
-CREATE TRIGGER set_updated_at
-BEFORE UPDATE ON patient.patient
-FOR EACH ROW
-EXECUTE FUNCTION update_updated_at_column();
+-- CREATE TRIGGER set_updated_at
+-- BEFORE UPDATE ON patient.patient
+-- FOR EACH ROW
+-- EXECUTE FUNCTION update_updated_at_column();
 

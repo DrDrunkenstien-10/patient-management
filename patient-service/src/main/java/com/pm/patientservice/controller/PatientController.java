@@ -33,13 +33,6 @@ public class PatientController {
         this.patientService = patientService;
     }
 
-    @GetMapping
-    @Operation(summary = "Get Patients")
-    public ResponseEntity<List<PatientResponseDTO>> getPatients() {
-        List<PatientResponseDTO> patients = patientService.getPatients();
-        return ResponseEntity.ok().body(patients);
-    }
-
     @PostMapping
     @Operation(summary = "Create Patients")
     public ResponseEntity<PatientResponseDTO> createPatient(@Validated({ Default.class,
@@ -48,18 +41,25 @@ public class PatientController {
         return ResponseEntity.ok().body(patientResponseDTO);
     }
 
+    @GetMapping
+    @Operation(summary = "Get Patients")
+    public ResponseEntity<List<PatientResponseDTO>> getPatients() {
+        List<PatientResponseDTO> patients = patientService.getPatients();
+        return ResponseEntity.ok().body(patients);
+    }
+
     @PutMapping("/{id}")
     @Operation(summary = "Update Patients")
-    public ResponseEntity<PatientResponseDTO> updatePatient(@PathVariable("id") UUID id,
+    public ResponseEntity<PatientResponseDTO> updatePatient(@PathVariable("id") UUID patientId,
             @Validated({ Default.class }) @RequestBody PatientRequestDTO patientRequestDTO) {
-        PatientResponseDTO patientResponseDTO = patientService.updatePatient(id, patientRequestDTO);
+        PatientResponseDTO patientResponseDTO = patientService.updatePatient(patientId, patientRequestDTO);
         return ResponseEntity.ok().body(patientResponseDTO);
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete Patients")
-    public ResponseEntity<Void> deletePatient(@PathVariable("id") UUID id) {
-        patientService.deletePatient(id);
+    public ResponseEntity<Void> deletePatient(@PathVariable("id") UUID patientId) {
+        patientService.deletePatient(patientId);
         return ResponseEntity.noContent().build();
     }
 }

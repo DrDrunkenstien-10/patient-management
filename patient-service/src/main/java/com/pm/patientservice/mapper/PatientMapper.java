@@ -1,7 +1,5 @@
 package com.pm.patientservice.mapper;
 
-import java.time.LocalDate;
-
 import com.pm.patientservice.dto.PatientRequestDTO;
 import com.pm.patientservice.dto.PatientResponseDTO;
 import com.pm.patientservice.model.Patient;
@@ -10,11 +8,21 @@ public class PatientMapper {
     public static PatientResponseDTO toDTO(Patient patient) {
         PatientResponseDTO patientResponseDTO = new PatientResponseDTO();
 
-        patientResponseDTO.setId(patient.getId().toString());
+        patientResponseDTO.setPatientId(patient.getPatientId().toString());
         patientResponseDTO.setName(patient.getName());
-        patientResponseDTO.setAddress(patient.getAddress());
+        patientResponseDTO.setGender(patient.getGender());
+        patientResponseDTO.setDateOfBirth(patient.getDateOfBirth());
+        patientResponseDTO.setAadhaarNumber(patient.getAadhaarNumber());
+        patientResponseDTO.setContactPhone(patient.getContactPhone());
         patientResponseDTO.setEmail(patient.getEmail());
-        patientResponseDTO.setDateOfBirth(patient.getDateOfBirth().toString());
+        patientResponseDTO.setAddress(patient.getAddress());
+        patientResponseDTO.setMedicalHistory(patient.getMedicalHistory());
+        patientResponseDTO.setAllergies(patient.getAllergies());
+        patientResponseDTO.setMedications(patient.getMedications());
+        patientResponseDTO.setConsents(patient.getConsents());
+        patientResponseDTO.setEmergencyContact(patient.getEmergencyContact());
+        patientResponseDTO.setCreatedAt(patient.getCreatedAt().toString());
+        patientResponseDTO.setUpdatedAt(patient.getUpdatedAt().toString());
 
         return patientResponseDTO;
     }
@@ -23,10 +31,17 @@ public class PatientMapper {
         Patient patient = new Patient();
 
         patient.setName(patientRequestDTO.getName());
-        patient.setAddress(patientRequestDTO.getAddress());
+        patient.setGender(patientRequestDTO.getGender());
+        patient.setDateOfBirth(patientRequestDTO.getDateOfBirth());
+        patient.setAadhaarNumber(patientRequestDTO.getAadhaarNumber());
+        patient.setContactPhone(patientRequestDTO.getContactPhone());
         patient.setEmail(patientRequestDTO.getEmail());
-        patient.setDateOfBirth(LocalDate.parse(patientRequestDTO.getDateOfBirth()));
-        patient.setRegisteredDate(LocalDate.parse(patientRequestDTO.getRegisteredDate()));
+        patient.setAddress(patientRequestDTO.getAddress());
+        patient.setMedicalHistory(patientRequestDTO.getMedicalHistory());
+        patient.setAllergies(patientRequestDTO.getAllergies());
+        patient.setMedications(patientRequestDTO.getMedications());
+        patient.setConsents(patientRequestDTO.getConsents());
+        patient.setEmergencyContact(patientRequestDTO.getEmergencyContact());
 
         return patient;
     }
