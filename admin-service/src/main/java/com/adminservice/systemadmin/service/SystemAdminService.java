@@ -13,39 +13,36 @@ import com.adminservice.systemadmin.repository.SystemAdminRepository;
 
 import jakarta.transaction.Transactional;
 
-
 import java.util.List;
 
-import com.adminservice.systemadmin.validator.SystemAdminValidator;
 
 @Service
 public class SystemAdminService {
-      private SystemAdminRepository systemAdminRepository;
-    private SystemAdminValidator systemAdminValidator;
+    private SystemAdminRepository systemAdminRepository;
 
-    public SystemAdminService(SystemAdminRepository systemAdminRepository, SystemAdminValidator systemAdminValidator) {
+    public SystemAdminService(SystemAdminRepository systemAdminRepository) {
         this.systemAdminRepository = systemAdminRepository;
-        this.systemAdminValidator = systemAdminValidator;
+
     }
 
     public SystemAdminResponseDTO createSystemAdmin(SystemAdminRequestDTO systemAdminRequestDTO) {
-        systemAdminValidator.validateForCreation(systemAdminRequestDTO);
 
         SystemAdmin newSystemAdmin = systemAdminRepository.save(SystemAdminMapper.toModel(systemAdminRequestDTO));
 
         return SystemAdminMapper.toDto(newSystemAdmin);
     }
 
-     public List<SystemAdminResponseDTO> getSystemAdmins() {
+    public List<SystemAdminResponseDTO> getSystemAdmins() {
         List<SystemAdmin> systemAdmins = systemAdminRepository.findAll();
 
-        List<SystemAdminResponseDTO> systemAdminResponseDTOs = systemAdmins.stream().map(systemAdmin -> SystemAdminMapper.toDto(systemAdmin))
+        List<SystemAdminResponseDTO> systemAdminResponseDTOs = systemAdmins.stream()
+                .map(systemAdmin -> SystemAdminMapper.toDto(systemAdmin))
                 .toList();
 
         return systemAdminResponseDTOs;
     }
 
-     public SystemAdminResponseDTO updateSystemAdmin(UUID systemAdminId, SystemAdminRequestDTO systemAdminRequestDTO) {
+    public SystemAdminResponseDTO updateSystemAdmin(UUID systemAdminId, SystemAdminRequestDTO systemAdminRequestDTO) {
         SystemAdmin systemAdmin = systemAdminRepository.findById(systemAdminId)
                 .orElseThrow(() -> new SystemAdminNotFoundException(
                         "System admin not found with ID: " + systemAdminRequestDTO.getSystemAdminId()));
@@ -58,7 +55,7 @@ public class SystemAdminService {
 
         return SystemAdminMapper.toDto(updatedSystemAdmin);
     }
-    
+
     @Transactional
     public void deleteSystemAdminById(UUID systemAdminId) {
         SystemAdmin systemAdmin = systemAdminRepository.findById(systemAdminId)
@@ -66,6 +63,5 @@ public class SystemAdminService {
                         "System Admin not found with ID: " + systemAdminId));
         systemAdminRepository.delete(systemAdmin);
     }
-
 
 }
