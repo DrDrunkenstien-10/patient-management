@@ -23,8 +23,8 @@ CREATE TABLE IF NOT EXISTS admin.system_admin (
     role admin.system_admin_role NOT NULL,
     access_level admin.admin_access_level NOT NULL,
     last_login TIMESTAMPTZ,
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS staff.doctor (
@@ -39,7 +39,9 @@ CREATE TABLE IF NOT EXISTS staff.doctor (
     contact_email TEXT NOT NULL,
     contact_phone TEXT NOT NULL,
     practice_location TEXT NOT NULL,
-    role_code TEXT
+    role_code TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS staff.receptionist (
@@ -55,8 +57,33 @@ CREATE TABLE IF NOT EXISTS staff.receptionist (
     role_title TEXT NOT NULL,
     access_level staff.receptionist_access_level NOT NULL,
     last_login TIMESTAMPTZ,
-    status staff.receptionist_status NOT NULL
+    status staff.receptionist_status NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+   NEW.updated_at = NOW();
+   RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- For system_admin
+CREATE TRIGGER set_admin_updated_at
+BEFORE UPDATE ON admin.system_admin
+FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- For doctor
+CREATE TRIGGER set_doctor_updated_at
+BEFORE UPDATE ON staff.doctor
+FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- For receptionist
+CREATE TRIGGER set_receptionist_updated_at
+BEFORE UPDATE ON staff.receptionist
+FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Optional sample data
 
