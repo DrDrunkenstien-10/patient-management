@@ -48,6 +48,12 @@ public class ReceptionistController {
 
     }
 
+    @GetMapping("{id}")
+    public ResponseEntity<ReceptionistResponseDTO> getReceptionistById(@PathVariable("id") UUID receptionistId) {
+        ReceptionistResponseDTO receptionistResponseDTO = receptionistService.getReceptionistById(receptionistId);
+        return ResponseEntity.ok().body(receptionistResponseDTO);
+    }
+
     @PutMapping("{id}")
     public ResponseEntity<ReceptionistResponseDTO> updateReceptionist(@PathVariable("id") UUID receptionistId,
             @Validated({ Default.class }) @RequestBody ReceptionistRequestDTO receptionistRequestDTO) {

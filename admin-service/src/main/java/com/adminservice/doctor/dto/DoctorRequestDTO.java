@@ -1,7 +1,6 @@
 package com.adminservice.doctor.dto;
 
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import com.adminservice.doctor.enums.Gender;

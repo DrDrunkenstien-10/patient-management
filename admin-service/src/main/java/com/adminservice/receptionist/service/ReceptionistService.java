@@ -43,6 +43,14 @@ public class ReceptionistService {
         return receptionistResponseDTOs;
     }
 
+    public ReceptionistResponseDTO getReceptionistById(UUID receptionistId) {
+        Receptionist receptionist = receptionistRepository.findById(receptionistId)
+                .orElseThrow(() -> new ReceptionistNotFoundException(
+                        "Receptionist not found with ID: " + receptionistId));
+
+        return ReceptionistMapper.toDto(receptionist);
+    }
+
     public ReceptionistResponseDTO updateReceptionist(UUID receptionistId,
             ReceptionistRequestDTO receptionistRequestDTO) {
         Receptionist receptionist = receptionistRepository.findById(receptionistId)

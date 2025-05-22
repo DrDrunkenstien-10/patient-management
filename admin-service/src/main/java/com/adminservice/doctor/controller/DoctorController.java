@@ -43,6 +43,12 @@ public class DoctorController {
         return ResponseEntity.ok().body(doctors);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<DoctorResponseDTO> getDoctorById(@PathVariable("id") UUID doctorId) {
+        DoctorResponseDTO doctorResponseDTO = doctorService.getDoctorById(doctorId);
+        return ResponseEntity.ok().body(doctorResponseDTO);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<DoctorResponseDTO> updateDoctor(@PathVariable("id") UUID doctorId,
             @Validated({ Default.class }) @RequestBody DoctorRequestDTO doctorRequestDTO) {

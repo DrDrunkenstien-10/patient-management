@@ -42,6 +42,13 @@ public class SystemAdminService {
         return systemAdminResponseDTOs;
     }
 
+    public SystemAdminResponseDTO getSystemAdminById(UUID systemAdminId) {
+        SystemAdmin systemAdmin = systemAdminRepository.findById(systemAdminId)
+                .orElseThrow(() -> new SystemAdminNotFoundException(
+                        "System admin not found with ID: " + systemAdminId));
+        return SystemAdminMapper.toDto(systemAdmin);
+    }
+
     public SystemAdminResponseDTO updateSystemAdmin(UUID systemAdminId, SystemAdminRequestDTO systemAdminRequestDTO) {
         SystemAdmin systemAdmin = systemAdminRepository.findById(systemAdminId)
                 .orElseThrow(() -> new SystemAdminNotFoundException(

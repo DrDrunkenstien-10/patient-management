@@ -58,6 +58,16 @@ public class Doctor {
     @Column(name = "updated_at", columnDefinition = "TIMESTAMPTZ")
     private OffsetDateTime updatedAt;
 
+    @PrePersist
+    protected void onCreate() {
+        createdAt = updatedAt = OffsetDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = OffsetDateTime.now();
+    }
+
     // Getters and setters
     public UUID getDoctorId() {
         return doctorId;
@@ -170,5 +180,5 @@ public class Doctor {
     public void setUpdatedAt(OffsetDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
-    
+
 }

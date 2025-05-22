@@ -42,6 +42,14 @@ public class DoctorService {
         return doctorResponseDTOs;
     }
 
+    public DoctorResponseDTO getDoctorById(UUID doctorId) {
+        Doctor doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new DoctorNotFoundException(
+                        "Doctor not found with ID: " + doctorId));
+
+        return DoctorMapper.toDto(doctor);
+    }
+    
     public DoctorResponseDTO updateDoctor(UUID doctorId, DoctorRequestDTO doctorRequestDTO) {
         Doctor doctor = doctorRepository.findById(doctorId)
                 .orElseThrow(() -> new DoctorNotFoundException(

@@ -44,6 +44,12 @@ public class SystemAdminController {
         return ResponseEntity.ok().body(systemAdmins);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<SystemAdminResponseDTO> getSystemAdminById(@PathVariable("id") UUID systemAdminId) {
+        SystemAdminResponseDTO systemAdminResponseDTO = systemAdminService.getSystemAdminById(systemAdminId);
+        return ResponseEntity.ok().body(systemAdminResponseDTO);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<SystemAdminResponseDTO> updateSystemAdmin(@PathVariable("id") UUID systemAdminId,
             @Validated({ Default.class }) @RequestBody SystemAdminRequestDTO systemAdminRequestDTO) {
