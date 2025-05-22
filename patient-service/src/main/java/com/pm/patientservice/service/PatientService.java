@@ -60,6 +60,12 @@ public class PatientService {
         return patientResponseDTOs;
     }
 
+    public PatientResponseDTO getPatientById(UUID patientId) {
+        Patient patient = patientRepository.findById(patientId)
+                .orElseThrow(() -> new PatientNotFoundException("Patient not found with ID: " + patientId));
+        return PatientMapper.toDTO(patient);
+    }
+
     public PatientResponseDTO updatePatient(UUID patientId, PatientRequestDTO patientRequestDTO) {
         Patient patient = patientRepository.findById(patientId)
                 .orElseThrow(() -> new PatientNotFoundException("Patient not found with ID: " + patientId));
