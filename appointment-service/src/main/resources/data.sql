@@ -17,27 +17,6 @@
 -- ALTER FUNCTION public.update_updated_at_column()
 -- 	OWNER TO postgres;
 
-
--- CREATE SCHEMA IF NOT EXISTS slot
--- 	AUTHORIZATION postgres;
-
--- CREATE TABLE IF NOT EXISTS slot.slot (
--- 	slot_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
--- 	name TEXT NOT NULL,
--- 	start_time TIME NOT NULL,
--- 	end_time TIME NOT NULL,
--- 	capacity INT NOT NULL CHECK (capacity > 0),
--- 	session_duration INT NOT NULL CHECK (session_duration > 0), -- in minutes
--- 	created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
--- 	updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
--- );
-
--- CREATE OR REPLACE TRIGGER set_slot_updated_at
--- 	BEFORE UPDATE ON slot.slot
--- 	FOR EACH ROW
--- 	EXECUTE FUNCTION public.update_updated_at_column();
-
-
 -- CREATE SCHEMA IF NOT EXISTS appointment
 -- 	AUTHORIZATION postgres;
 
