@@ -6,6 +6,8 @@ import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -14,9 +16,10 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "slot", schema = "slot")
 public class Slot {
-    
+
     @Id
-    @Column(name = "slot_id")
+    @Column(name = "slot_id", columnDefinition = "UUID", updatable = false, nullable = false)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID slotId;
 
     @Column(name = "name")
@@ -48,7 +51,7 @@ public class Slot {
         this.createdAt = OffsetDateTime.now();
         this.updatedAt = OffsetDateTime.now();
     }
-    
+
     @PreUpdate
     public void preUpdate() {
         this.updatedAt = OffsetDateTime.now();
@@ -128,5 +131,4 @@ public class Slot {
         this.updatedAt = updatedAt;
     }
 
-    
 }

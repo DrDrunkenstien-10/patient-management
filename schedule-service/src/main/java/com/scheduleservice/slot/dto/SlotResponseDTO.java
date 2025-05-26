@@ -1,25 +1,27 @@
 package com.scheduleservice.slot.dto;
 
+import java.util.UUID;
+
 public class SlotResponseDTO {
 
-    private String slotId;
+    private UUID slotId;
     private String name;
     private String startTime;
     private String endTime;
     private Integer capacity;
     private Integer sessionDuration;
-    private String doctorId;
+    private UUID doctorId;
 
     // Getters and Setters
 
-    public String getSlotId() {
+    public UUID getSlotId() {
         return slotId;
     }
 
-    public void setSlotId(String slotId) {
+    public void setSlotId(UUID slotId) {
         this.slotId = slotId;
     }
-    
+
     public String getName() {
         return name;
     }
@@ -60,11 +62,11 @@ public class SlotResponseDTO {
         this.sessionDuration = sessionDuration;
     }
 
-    public String getDoctorId() {
+    public UUID getDoctorId() {
         return doctorId;
     }
 
-    public void setDoctorId(String doctorId) {
+    public void setDoctorId(UUID doctorId) {
         this.doctorId = doctorId;
     }
 }

@@ -10,7 +10,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 @Entity
@@ -18,10 +22,11 @@ import jakarta.persistence.Table;
 public class Schedule {
 
     @Id
-    @Column(name = "schedule_id")
+    @Column(name = "schedule_id", columnDefinition = "UUID", updatable = false, nullable = false)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID scheduleId;
 
-    @Column(name = "doc_id")
+    @Column(name = "doc_id", nullable = false)
     private UUID docId;
 
     @Enumerated(EnumType.STRING)
@@ -40,8 +45,19 @@ public class Schedule {
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
 
-    //getters and setters
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = OffsetDateTime.now();
+        this.updatedAt = OffsetDateTime.now();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = OffsetDateTime.now();
+    }
     
+    // getters and setters
+
     public UUID getScheduleId() {
         return scheduleId;
     }
@@ -100,5 +116,4 @@ public class Schedule {
 
     // Getters and setters...
 
-    
 }

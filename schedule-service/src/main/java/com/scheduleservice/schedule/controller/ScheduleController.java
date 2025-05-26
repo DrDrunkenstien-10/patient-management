@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import org.springframework.web.bind.annotation.PostMapping;
+
 import com.scheduleservice.schedule.dto.ScheduleRequestDTO;
 import com.scheduleservice.schedule.dto.ScheduleResponseDTO;
 import com.scheduleservice.schedule.service.ScheduleService;
@@ -23,7 +25,6 @@ import jakarta.validation.groups.Default;
 @RestController
 @RequestMapping("/schedules")
 public class ScheduleController {
-
     private final ScheduleService scheduleService;
 
     public ScheduleController(ScheduleService scheduleService) {
@@ -55,4 +56,9 @@ public class ScheduleController {
         return ResponseEntity.ok("Schedule deleted successfully");
     }
 
+    @PostMapping
+    public ResponseEntity<ScheduleResponseDTO> createSchedule(@RequestBody ScheduleRequestDTO scheduleRequestDTO) {
+        ScheduleResponseDTO scheduleResponseDTO = scheduleService.createSchedule(scheduleRequestDTO);
+        return ResponseEntity.ok().body(scheduleResponseDTO);
+    }
 }

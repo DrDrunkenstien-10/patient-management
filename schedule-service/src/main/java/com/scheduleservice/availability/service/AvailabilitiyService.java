@@ -1,5 +1,8 @@
 package com.scheduleservice.availability.service;
 
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -11,21 +14,54 @@ import com.scheduleservice.availability.exception.AvailibilityExceptionHandler;
 import com.scheduleservice.availability.mapper.AvailabilityMapper;
 import com.scheduleservice.availability.model.Availability;
 import com.scheduleservice.availability.repository.AvailabiltyRepository;
+import com.scheduleservice.schedule.repository.ScheduleDateRange;
+import com.scheduleservice.schedule.repository.ScheduleRepository;
+import com.scheduleservice.slot.dto.SlotResponseDTO;
 
 import jakarta.transaction.Transactional;
 
 @Service
 public class AvailabilitiyService {
 
-    private AvailabiltyRepository availabilityRepository;
+    private final ScheduleRepository scheduleRepository;
+    private final AvailabiltyRepository availabiltyRepository;
 
-    public AvailabilitiyService(AvailabiltyRepository availabilityRepository) {
-        this.availabilityRepository = availabilityRepository;
+    public AvailabilitiyService(ScheduleRepository scheduleRepository, AvailabiltyRepository availabiltyRepository) {
+        this.scheduleRepository = scheduleRepository;
+        this.availabiltyRepository = availabiltyRepository;
+    }
 
+    public void createAvailability(SlotResponseDTO slotResponseDTO) {
+        List<ScheduleDateRange> scheduleDateRanges = scheduleRepository
+                .findByDocId(slotResponseDTO.getDoctorId());
+
+        List<Availability> availabilitiesToSave = new ArrayList<>();
+
+        for (ScheduleDateRange dateRange : scheduleDateRanges) {
+            LocalDate start = dateRange.getStartDate();
+            LocalDate end = dateRange.getEndDate();
+
+            for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
+                Availability availability = new Availability();
+
+                availability.setDocId(slotResponseDTO.getDoctorId());
+                availability.setSlotId(slotResponseDTO.getSlotId());
+                availability.setDate(date);
+                availability.setAvailability(true);
+                availability.setUnavailabilityReason(null);
+                OffsetDateTime now = OffsetDateTime.now();
+                availability.setCreatedAt(now);
+                availability.setUpdatedAt(now);
+
+                availabilitiesToSave.add(availability);
+            }
+        }
+
+        availabiltyRepository.saveAll(availabilitiesToSave);
     }
 
     public List<AvailabilityResponseDTO> getAvailabilities() {
-        List<Availability> availabilities = availabilityRepository.findAll();
+        List<Availability> availabilities = availabiltyRepository.findAll();
 
         List<AvailabilityResponseDTO> availabilityResponseDTO = availabilities.stream()
                 .map(availibility -> AvailabilityMapper.toDto(availibility))
@@ -35,7 +71,7 @@ public class AvailabilitiyService {
     }
 
     public AvailabilityResponseDTO getAvailibilityById(UUID availabilityId) {
-        Availability availability = availabilityRepository.findById(availabilityId)
+        Availability availability = availabiltyRepository.findById(availabilityId)
                 .orElseThrow(() -> new AvailibilityExceptionHandler(
                         "Availibility not found with ID: " + availabilityId));
         return AvailabilityMapper.toDto(availability);
@@ -43,7 +79,7 @@ public class AvailabilitiyService {
 
     public AvailabilityResponseDTO updateAvailability(UUID availabilityId,
             AvailabilityRequestDTO availabilityRequestDTO) {
-        Availability availability = availabilityRepository.findById(availabilityId)
+        Availability availability = availabiltyRepository.findById(availabilityId)
                 .orElseThrow(() -> new AvailibilityExceptionHandler(
                         "Availability not found with ID: " + availabilityId));
 
@@ -53,17 +89,17 @@ public class AvailabilitiyService {
         availability.setAvailability(availabilityRequestDTO.getAvailability());
         availability.setUnavailabilityReason(availabilityRequestDTO.getUnavailabilityReason());
 
-        Availability updatedAvailability = availabilityRepository.save(availability);
+        Availability updatedAvailability = availabiltyRepository.save(availability);
 
         return AvailabilityMapper.toDto(updatedAvailability);
     }
 
     @Transactional
     public void deleteAvailability(UUID availabilityId) {
-        Availability availability = availabilityRepository.findById(availabilityId)
+        Availability availability = availabiltyRepository.findById(availabilityId)
                 .orElseThrow(() -> new AvailibilityExceptionHandler(
                         "Availability not found with ID: " + availabilityId));
-        availabilityRepository.delete(availability);
+        availabiltyRepository.delete(availability);
     }
 
 }

@@ -26,4 +26,14 @@ public class SlotExceptionHandler {
         return ResponseEntity.badRequest().body(errors);
     }
 
+    @ExceptionHandler(SlotNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleSlotNotFoundException(SlotNotFoundException ex) {
+
+        log.warn("Slot already exists {}", ex.getMessage());
+
+        Map<String, String> errors = new HashMap<>();
+        errors.put("message", "Slot already exists");
+        return ResponseEntity.badRequest().body(errors);
+    }
+
 }

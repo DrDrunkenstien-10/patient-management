@@ -8,13 +8,13 @@ public interface SlotMapper {
 
     public static SlotResponseDTO toDto(Slot slot) {
         SlotResponseDTO dto = new SlotResponseDTO();
-        dto.setSlotId(slot.getSlotId().toString());
+        dto.setSlotId(slot.getSlotId());
         dto.setName(slot.getName());
         dto.setStartTime(slot.getStartTime().toString());
         dto.setEndTime(slot.getEndTime().toString());
         dto.setCapacity(slot.getCapacity());
         dto.setSessionDuration(slot.getSessionDuration());
-        dto.setDoctorId(slot.getDoctorId().toString());
+        dto.setDoctorId(slot.getDoctorId());
         return dto;
     }
 
