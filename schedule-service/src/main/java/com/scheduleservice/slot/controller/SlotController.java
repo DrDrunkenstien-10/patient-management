@@ -41,6 +41,12 @@ public class SlotController {
         return ResponseEntity.ok().body(slotResponseDTO);
     }
 
+    @GetMapping("/{id}/exists")
+    public ResponseEntity<Boolean> isSlotExists(@PathVariable("id") UUID slotId) {
+        boolean exists = slotService.isSlotExists(slotId);
+        return ResponseEntity.ok().body(exists);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<SlotResponseDTO> updateSlot(@PathVariable("id") UUID slotId,
             @Validated({ Default.class }) @RequestBody SlotRequestDTO slotRequestDTO) {

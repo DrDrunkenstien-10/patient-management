@@ -43,3 +43,5 @@
 -- 	BEFORE UPDATE ON appointment.appointment
 -- 	FOR EACH ROW
 -- 	EXECUTE FUNCTION public.update_updated_at_column();
+
+-- ALTER TABLE appointment.appointment ADD COLUMN appointment_date DATE NOT NULL;

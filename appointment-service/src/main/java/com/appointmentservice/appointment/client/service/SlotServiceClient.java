@@ -24,5 +24,12 @@ public class SlotServiceClient {
                 .bodyToMono(SlotDTO.class)
                 .block();
     }
-    
+
+    public boolean isSlotExists(UUID slotId) {
+        return webClient.get()
+                .uri("/slots/{id}/exists", slotId)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .block();
+    }
 }

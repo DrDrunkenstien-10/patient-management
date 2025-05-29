@@ -55,6 +55,12 @@ public class PatientController {
         return ResponseEntity.ok().body(patientResponseDTO);
     }
 
+    @GetMapping("/{id}/exists")
+    public ResponseEntity<Boolean> isPatientExists(@PathVariable("id") UUID patientId) {
+        boolean exists = patientService.isPatientExists(patientId);
+        return ResponseEntity.ok().body(exists);
+    }
+
     @PutMapping("/{id}")
     @Operation(summary = "Update Patients")
     public ResponseEntity<PatientResponseDTO> updatePatient(@PathVariable("id") UUID patientId,

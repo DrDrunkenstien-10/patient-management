@@ -17,6 +17,7 @@ import com.appointmentservice.appointment.enums.AppointmentStatus;
 import com.appointmentservice.appointment.mapper.AppointmentMapper;
 import com.appointmentservice.appointment.model.Appointment;
 import com.appointmentservice.appointment.repository.AppointmentRepository;
+import com.appointmentservice.appointment.validator.AppointmentValidator;
 
 @Service
 public class AppointmentService {
@@ -24,16 +25,21 @@ public class AppointmentService {
     private final SlotServiceClient slotServiceClient;
     private final PatientServiceClient patientServiceClient;
     private final DoctorServiceClient doctorServiceClient;
+    private final AppointmentValidator appointmentValidator;
 
     public AppointmentService(AppointmentRepository appointmentRepository, SlotServiceClient slotServiceClient,
-            PatientServiceClient patientServiceClient, DoctorServiceClient doctorServiceClient) {
+            PatientServiceClient patientServiceClient, DoctorServiceClient doctorServiceClient,
+            AppointmentValidator appointmentValidator) {
         this.appointmentRepository = appointmentRepository;
         this.slotServiceClient = slotServiceClient;
         this.patientServiceClient = patientServiceClient;
         this.doctorServiceClient = doctorServiceClient;
+        this.appointmentValidator = appointmentValidator;
     }
 
     public AppointmentResponseDTO createAppointment(AppointmentRequestDTO appointmentRequestDTO) {
+        appointmentValidator.validateForCreation(appointmentRequestDTO);
+
         Optional<Appointment> existingAppointmentOpt = appointmentRepository
                 .findTop1ByDoctorIdAndSlotIdOrderByRankDesc(
                         appointmentRequestDTO.getDoctorId(),
@@ -72,8 +78,8 @@ public class AppointmentService {
         LocalTime appointmentTime = existingAppointment.getAppointmentTime();
         int rank = existingAppointment.getRank();
 
-        int sessionDuration = slotDTO.getSessionDuration(); 
-        int capacity = slotDTO.getCapacity(); 
+        int sessionDuration = slotDTO.getSessionDuration();
+        int capacity = slotDTO.getCapacity();
 
         if (rank < capacity) {
 

@@ -24,4 +24,11 @@ public class PatientServiceClient {
                 .block();
     }
 
+    public boolean isPatientExists(UUID patientId) {
+        return webClient.get()
+                .uri("/patients/{id}/exists", patientId)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .block();
+    }
 }

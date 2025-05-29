@@ -88,4 +88,8 @@ public class SlotService {
                         "Slot not found with ID: " + slotId));
         slotRepository.delete(slot);
     }
+
+    public boolean isSlotExists(UUID slotId) {
+        return slotRepository.existsById(slotId);
+    }
 }

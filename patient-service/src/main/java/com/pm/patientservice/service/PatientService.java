@@ -92,4 +92,8 @@ public class PatientService {
     public void deletePatient(UUID id) {
         patientRepository.deleteById(id);
     }
+
+    public boolean isPatientExists(UUID patientId) {
+        return patientRepository.existsById(patientId);
+    }
 }

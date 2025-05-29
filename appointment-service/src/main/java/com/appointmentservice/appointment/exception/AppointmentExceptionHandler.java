@@ -3,8 +3,8 @@ package com.appointmentservice.appointment.exception;
 import java.util.HashMap;
 import java.util.Map;
 
-// import org.slf4j.Logger;
-// import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -13,8 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class AppointmentExceptionHandler {
 
-    // private static final Logger log =
-    // LoggerFactory.getLogger(AppointmentExceptionHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(AppointmentExceptionHandler.class);
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationException(MethodArgumentNotValidException ex) {
@@ -23,6 +22,36 @@ public class AppointmentExceptionHandler {
         ex.getBindingResult().getFieldErrors()
                 .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
 
+        return ResponseEntity.badRequest().body(errors);
+    }
+
+    @ExceptionHandler(DoctorNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleDoctorNotFoundException(DoctorNotFoundException ex) {
+
+        log.warn("Doctor not found {}", ex.getMessage());
+
+        Map<String, String> errors = new HashMap<>();
+        errors.put("message", "Doctor not found");
+        return ResponseEntity.badRequest().body(errors);
+    }
+
+    @ExceptionHandler(PatientNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handlePatientNotFoundException(PatientNotFoundException ex) {
+
+        log.warn("Patient not found {}", ex.getMessage());
+
+        Map<String, String> errors = new HashMap<>();
+        errors.put("message", "Patient not found");
+        return ResponseEntity.badRequest().body(errors);
+    }
+
+    @ExceptionHandler(SlotNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleSlotNotFoundException(SlotNotFoundException ex) {
+
+        log.warn("Slot not found {}", ex.getMessage());
+
+        Map<String, String> errors = new HashMap<>();
+        errors.put("message", "Slot not found");
         return ResponseEntity.badRequest().body(errors);
     }
 }
