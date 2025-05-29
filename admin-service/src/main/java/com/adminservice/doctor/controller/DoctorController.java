@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 
 import jakarta.validation.groups.Default;
 
+
 @RestController
 @RequestMapping("/doctors")
 public class DoctorController {
@@ -54,6 +55,12 @@ public class DoctorController {
             @Validated({ Default.class }) @RequestBody DoctorRequestDTO doctorRequestDTO) {
         DoctorResponseDTO doctorResponseDTO = doctorService.updateDoctor(doctorId, doctorRequestDTO);
         return ResponseEntity.ok().body(doctorResponseDTO);
+    }
+
+    @GetMapping("/{id}/exists")
+    public ResponseEntity<Boolean> isDoctorExists(@PathVariable("id") UUID doctorId) {
+        boolean exists = doctorService.isDoctorExists(doctorId);
+        return ResponseEntity.ok(exists);
     }
 
     @DeleteMapping("/{id}")

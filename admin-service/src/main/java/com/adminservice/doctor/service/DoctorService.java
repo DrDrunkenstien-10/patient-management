@@ -80,4 +80,8 @@ public class DoctorService {
         doctorRepository.deleteById(doctorId);
     }
 
+    public boolean isDoctorExists(UUID doctorId) {
+        return doctorRepository.existsById(doctorId);
+    }
+
 }
