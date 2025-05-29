@@ -118,11 +118,11 @@
 
 
 -- Insert dummy 
-INSERT INTO slot.slot (slot_id, name, start_time, end_time, capacity, session_duration, doctor_id) 
-VALUES (gen_random_uuid(), 'Morning Slot', '09:00', '12:00', 10, 30, gen_random_uuid());
-INSERT INTO schedule.schedule (schedule_id, doc_id, schedule_type, start_date, end_date) 
-VALUES (gen_random_uuid(), gen_random_uuid(), 'week', '2025-06-01', '2025-06-07');
-INSERT INTO schedule.availability (availability_id, doc_id, slot_id, date, availability, unavailability_reason) 
-VALUES (gen_random_uuid(), gen_random_uuid(), (SELECT slot_id FROM slot.slot LIMIT 1), '2025-06-01', FALSE, 'Doctor on leave'), 
-(gen_random_uuid(), gen_random_uuid(), (SELECT slot_id FROM slot.slot LIMIT 1), '2025-06-02', TRUE, NULL);
+-- INSERT INTO slot.slot (slot_id, name, start_time, end_time, capacity, session_duration, doctor_id) 
+-- VALUES (gen_random_uuid(), 'Morning Slot', '09:00', '12:00', 10, 30, gen_random_uuid());
+-- INSERT INTO schedule.schedule (schedule_id, doc_id, schedule_type, start_date, end_date) 
+-- VALUES (gen_random_uuid(), gen_random_uuid(), 'week', '2025-06-01', '2025-06-07');
+-- INSERT INTO schedule.availability (availability_id, doc_id, slot_id, date, availability, unavailability_reason) 
+-- VALUES (gen_random_uuid(), gen_random_uuid(), (SELECT slot_id FROM slot.slot LIMIT 1), '2025-06-01', FALSE, 'Doctor on leave'), 
+-- (gen_random_uuid(), gen_random_uuid(), (SELECT slot_id FROM slot.slot LIMIT 1), '2025-06-02', TRUE, NULL);
 

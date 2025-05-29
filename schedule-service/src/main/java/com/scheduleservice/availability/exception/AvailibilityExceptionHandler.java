@@ -1,15 +1,9 @@
 package com.scheduleservice.availability.exception;
 
 
-import org.springframework.web.bind.annotation.ControllerAdvice;
+public class AvailibilityExceptionHandler extends RuntimeException {
 
-
-@ControllerAdvice
-public class AvailibilityExceptionHandler  extends RuntimeException{
-    
-
-
-public AvailibilityExceptionHandler(String message) {
+    public AvailibilityExceptionHandler(String message) {
         super(message);
     }
 

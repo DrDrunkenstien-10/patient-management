@@ -5,6 +5,12 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.appointmentservice.appointment.client.dto.DoctorDTO;
+import com.appointmentservice.appointment.client.dto.PatientDTO;
+import com.appointmentservice.appointment.client.dto.SlotDTO;
+import com.appointmentservice.appointment.client.service.DoctorServiceClient;
+import com.appointmentservice.appointment.client.service.PatientServiceClient;
+import com.appointmentservice.appointment.client.service.SlotServiceClient;
 import com.appointmentservice.appointment.dto.AppointmentRequestDTO;
 import com.appointmentservice.appointment.dto.AppointmentResponseDTO;
 import com.appointmentservice.appointment.enums.AppointmentStatus;
@@ -15,9 +21,16 @@ import com.appointmentservice.appointment.repository.AppointmentRepository;
 @Service
 public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
+    private final SlotServiceClient slotServiceClient;
+    private final PatientServiceClient patientServiceClient;
+    private final DoctorServiceClient doctorServiceClient;
 
-    public AppointmentService(AppointmentRepository appointmentRepository) {
+    public AppointmentService(AppointmentRepository appointmentRepository, SlotServiceClient slotServiceClient,
+            PatientServiceClient patientServiceClient, DoctorServiceClient doctorServiceClient) {
         this.appointmentRepository = appointmentRepository;
+        this.slotServiceClient = slotServiceClient;
+        this.patientServiceClient = patientServiceClient;
+        this.doctorServiceClient = doctorServiceClient;
     }
 
     public AppointmentResponseDTO createAppointment(AppointmentRequestDTO appointmentRequestDTO) {
@@ -28,15 +41,19 @@ public class AppointmentService {
 
         Appointment appointment;
 
+        SlotDTO slotDTO = slotServiceClient.getSlotById(appointmentRequestDTO.getSlotId());
+        PatientDTO patientDTO = patientServiceClient.getPatientById(appointmentRequestDTO.getPatientId());
+        DoctorDTO doctorDTO = doctorServiceClient.getDoctorById(appointmentRequestDTO.getDoctorId());
+
         if (existingAppointmentOpt.isPresent()) {
             // Create subsequent appointment
-            appointment = createSubsequentAppointment(existingAppointmentOpt.get(), appointmentRequestDTO);
+            appointment = createSubsequentAppointment(existingAppointmentOpt.get(), appointmentRequestDTO, slotDTO);
         } else {
             // Create new appointment
             appointment = createFirstAppointment(appointmentRequestDTO);
         }
 
-        return AppointmentMapper.toDto(appointment);
+        return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
     }
 
     private Appointment createFirstAppointment(AppointmentRequestDTO appointmentRequestDTO) {
@@ -50,12 +67,13 @@ public class AppointmentService {
     }
 
     private Appointment createSubsequentAppointment(Appointment existingAppointment,
-            AppointmentRequestDTO appointmentRequestDTO) {
+            AppointmentRequestDTO appointmentRequestDTO, SlotDTO slotDTO) {
+
         LocalTime appointmentTime = existingAppointment.getAppointmentTime();
         int rank = existingAppointment.getRank();
-        System.out.println("Rank: " + rank);
-        int sessionDuration = 30; // in minutes
-        int capacity = 6;
+
+        int sessionDuration = slotDTO.getSessionDuration(); // in minutes
+        int capacity = slotDTO.getCapacity(); // total number of appointments allowed in the slot
 
         if (rank < capacity) {
             // Increment appointment time by session duration

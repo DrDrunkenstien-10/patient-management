@@ -6,6 +6,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import com.appointmentservice.appointment.enums.AppointmentStatus;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -30,6 +31,9 @@ public class Appointment {
 
     @Column(name = "appointment_time", nullable = false)
     private LocalTime appointmentTime;
+
+    @Column(name = "appointment_date", nullable = false)
+    private LocalDate appointmentDate; // Assuming this is needed for the appointment date
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -85,6 +89,14 @@ public class Appointment {
 
     public void setAppointmentTime(LocalTime appointmentTime) {
         this.appointmentTime = appointmentTime;
+    }
+
+    public LocalDate getAppointmentDate() {
+        return appointmentDate;
+    }
+
+    public void setAppointmentDate(LocalDate appointmentDate) {
+        this.appointmentDate = appointmentDate;
     }
 
     public AppointmentStatus getStatus() {

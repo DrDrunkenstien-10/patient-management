@@ -1,0 +1,17 @@
+{"properties": [
+  {
+    "name": "slot.service.url",
+    "type": "java.lang.String",
+    "description": "A description for 'slot.service.url'"
+  },
+  {
+    "name": "patient.service.url",
+    "type": "java.lang.String",
+    "description": "A description for 'patient.service.url'"
+  },
+  {
+    "name": "admim.server.url",
+    "type": "java.lang.String",
+    "description": "A description for 'admim.server.url'"
+  }
+]}
