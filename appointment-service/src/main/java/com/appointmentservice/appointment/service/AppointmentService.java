@@ -72,10 +72,11 @@ public class AppointmentService {
         LocalTime appointmentTime = existingAppointment.getAppointmentTime();
         int rank = existingAppointment.getRank();
 
-        int sessionDuration = slotDTO.getSessionDuration(); // in minutes
-        int capacity = slotDTO.getCapacity(); // total number of appointments allowed in the slot
+        int sessionDuration = slotDTO.getSessionDuration(); 
+        int capacity = slotDTO.getCapacity(); 
 
         if (rank < capacity) {
+
             // Increment appointment time by session duration
             appointmentTime = appointmentTime.plusMinutes(sessionDuration);
 
@@ -86,7 +87,7 @@ public class AppointmentService {
             return appointmentRepository.save(AppointmentMapper.toModel(appointmentRequestDTO));
         } else {
             System.out.println("Capacity reached!!!");
-            // TODO: Update schedule.availability table
+
             // Possibly return null or throw an exception depending on your design
             return null;
         }

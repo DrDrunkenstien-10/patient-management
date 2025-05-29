@@ -1,4 +1,4 @@
-package com.appointmentservice.appointment.config;
+package com.scheduleservice.config;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,22 +8,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class WebClientConfig {
-
-    @Bean
-    @Qualifier("slotServiceClient")
-    public WebClient slotServiceWebClient(@Value("${slot.service.url}") String slotServiceUrl) {
-        return WebClient.builder()
-                .baseUrl(slotServiceUrl)
-                .build();
-    }
-
-    @Bean
-    @Qualifier("patientServiceClient")
-    public WebClient patientServiceWebClient(@Value("${patient.service.url}") String patientServiceUrl) {
-        return WebClient.builder()
-                .baseUrl(patientServiceUrl)
-                .build();
-    }
 
     @Bean
     @Qualifier("doctorServiceClient")
