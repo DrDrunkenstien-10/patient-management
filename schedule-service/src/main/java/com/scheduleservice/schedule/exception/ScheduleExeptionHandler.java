@@ -45,4 +45,14 @@ public class ScheduleExeptionHandler {
         errors.put("message", "Schedule already exists");
         return ResponseEntity.badRequest().body(errors);
     }
+
+    @ExceptionHandler(DoctorNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleDoctorNotFoundException(DoctorNotFoundException ex) {
+
+        log.warn("Doctor not found {}", ex.getMessage());
+
+        Map<String, String> errors = new HashMap<>();
+        errors.put("message", "Doctor not found");
+        return ResponseEntity.badRequest().body(errors);
+    }
 }

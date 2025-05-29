@@ -12,6 +12,7 @@ import com.scheduleservice.slot.exception.SlotNotFoundException;
 import com.scheduleservice.slot.mapper.SlotMapper;
 import com.scheduleservice.slot.model.Slot;
 import com.scheduleservice.slot.repository.SlotRepository;
+import com.scheduleservice.slot.validator.SlotValidator;
 
 import jakarta.transaction.Transactional;
 
@@ -20,15 +21,20 @@ public class SlotService {
     private final CapacityCalculator capacityCalculator;
     private final SlotRepository slotRepository;
     private final AvailabilitiyService availabilitiyService;
+    private final SlotValidator slotValidator;
 
     public SlotService(CapacityCalculator capacityCalculator, SlotRepository slotRepository,
-            AvailabilitiyService availabilitiyService) {
+            AvailabilitiyService availabilitiyService, SlotValidator slotValidator) {
         this.capacityCalculator = capacityCalculator;
         this.slotRepository = slotRepository;
         this.availabilitiyService = availabilitiyService;
+        this.slotValidator = slotValidator;
     }
 
     public SlotResponseDTO createSlot(SlotRequestDTO slotRequestDTO) {
+
+        slotValidator.validateForCreation(slotRequestDTO);
+
         int capacity = capacityCalculator.calculateCapacity(slotRequestDTO);
         slotRequestDTO.setCapacity(capacity);
 
