@@ -56,14 +56,15 @@ public class AppointmentService {
             appointment = createSubsequentAppointment(existingAppointmentOpt.get(), appointmentRequestDTO, slotDTO);
         } else {
             // Create new appointment
-            appointment = createFirstAppointment(appointmentRequestDTO);
+            appointment = createFirstAppointment(appointmentRequestDTO, slotDTO);
         }
 
         return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
     }
 
-    private Appointment createFirstAppointment(AppointmentRequestDTO appointmentRequestDTO) {
-        LocalTime startTime = LocalTime.parse("11:00:00");
+    private Appointment createFirstAppointment(AppointmentRequestDTO appointmentRequestDTO, SlotDTO slotDTO) {
+        //LocalTime startTime = LocalTime.parse("11:00:00");
+        LocalTime startTime = LocalTime.parse(slotDTO.getStartTime());
 
         appointmentRequestDTO.setAppointmenTime(startTime);
         appointmentRequestDTO.setAppointmentStatus(AppointmentStatus.NOT_VISITED);
