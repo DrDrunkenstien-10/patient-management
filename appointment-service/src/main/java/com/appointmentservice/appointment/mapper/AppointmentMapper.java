@@ -17,6 +17,7 @@ public class AppointmentMapper {
             SlotDTO slot,
             DoctorDTO doctor,
             PatientDTO patient) {
+
         AppointmentResponseDTO dto = new AppointmentResponseDTO();
 
         dto.setAppointmentId(appointment.getAppointmentId());
@@ -25,18 +26,15 @@ public class AppointmentMapper {
         dto.setSlotId(appointment.getSlotId());
         dto.setAppointmentStatus(appointment.getStatus());
 
-        // Format date and time
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm a");
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
-        // Parse start and end time from String to LocalTime
-        DateTimeFormatter slotTimeFormatter = DateTimeFormatter.ofPattern("HH:mm");
-        LocalTime startTime = LocalTime.parse(slot.getStartTime(), slotTimeFormatter);
-        LocalTime endTime = LocalTime.parse(slot.getEndTime(), slotTimeFormatter);
-        LocalDate appointmentDate = appointment.getAppointmentDate(); 
+        // Get start time from appointment
+        LocalTime startTime = appointment.getAppointmentTime();
+        LocalTime endTime = startTime.plusMinutes(slot.getSessionDuration()); // add session duration
 
         dto.setAppointmentTime(startTime.format(timeFormatter) + " - " + endTime.format(timeFormatter));
-        dto.setAppointmentDate(appointmentDate.format(dateFormatter));
+        dto.setAppointmentDate(appointment.getAppointmentDate().format(dateFormatter));
 
         dto.setSlotName(slot.getName());
         dto.setDoctorName(doctor.getName());
@@ -54,7 +52,7 @@ public class AppointmentMapper {
         appointment.setPatientId(appointmentRequestDTO.getPatientId());
         appointment.setSlotId(appointmentRequestDTO.getSlotId());
         appointment.setAppointmentTime(appointmentRequestDTO.getAppointmenTime());
-        appointment.setAppointmentDate(appointmentRequestDTO.getAppointmentDate()); 
+        appointment.setAppointmentDate(appointmentRequestDTO.getAppointmentDate());
         appointment.setStatus(appointmentRequestDTO.getAppointmentStatus());
         appointment.setRank(appointmentRequestDTO.getRank());
 
