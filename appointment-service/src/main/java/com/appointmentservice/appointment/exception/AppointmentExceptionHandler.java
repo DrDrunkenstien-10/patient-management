@@ -62,4 +62,22 @@ public class AppointmentExceptionHandler {
                 .status(HttpStatus.CONFLICT) // 409 Conflict
                 .body(ex.getMessage());
     }
+    
+    @ExceptionHandler(AppointmentExistsException.class)
+    public ResponseEntity<Map<String, String>> handleAppointExistsException(AppointmentExistsException ex) {
+        log.warn("appointment for id exists");
+
+        Map<String, String> errors = new HashMap<>();
+        errors.put("message", "appointment for id exists");
+        return ResponseEntity.badRequest().body(errors);
+    }
+
+    @ExceptionHandler(AppointmentNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleAppointNotFoundException(AppointmentNotFoundException ex) {
+        log.warn("appointment does not exists");
+
+        Map<String, String> errors = new HashMap<>();
+        errors.put("message", "appointment does not exists");
+        return ResponseEntity.badRequest().body(errors);
+    }
 }

@@ -1,6 +1,7 @@
 package com.appointmentservice.appointment.repository;
 
 import java.util.List;
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -13,4 +14,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
 
 
     Optional<Appointment> findTop1ByDoctorIdAndSlotIdOrderByRankDesc(UUID doctorId, UUID slotId);
+    boolean existsByDoctorIdAndPatientIdAndSlotIdAndAppointmentDate(UUID doctorId, UUID slotId, UUID patientId,
+            LocalDate appointmentDate);
+
+    boolean existsByAppointmentId(UUID appointmentId);
 }

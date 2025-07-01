@@ -44,6 +44,19 @@ public class AppointmentMapper {
         return dto;
     }
 
+    public static AppointmentResponseDTO toDto(Appointment appointment) {
+        AppointmentResponseDTO dto = new AppointmentResponseDTO();
+        dto.setAppointmentId(appointment.getAppointmentId());
+        dto.setDoctorId(appointment.getDoctorId());
+        dto.setPatientId(appointment.getPatientId());
+        dto.setSlotId(appointment.getSlotId());
+        dto.setAppointmentStatus(appointment.getStatus());
+        dto.setCreatedAt(appointment.getCreatedAt());
+        dto.setUpdatedAt(appointment.getUpdatedAt());
+
+        return dto;
+    }
+
     public static Appointment toModel(AppointmentRequestDTO appointmentRequestDTO) {
         Appointment appointment = new Appointment();
 

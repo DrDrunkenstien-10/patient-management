@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.appointmentservice.appointment.client.dto.AvailabilityDTO;
 import com.appointmentservice.appointment.client.dto.DoctorDTO;
@@ -21,6 +22,7 @@ import com.appointmentservice.appointment.dto.AppointmentRequestDTO;
 import com.appointmentservice.appointment.dto.AppointmentResponseDTO;
 import com.appointmentservice.appointment.enums.AppointmentStatus;
 import com.appointmentservice.appointment.exception.SlotCapacityExceededException;
+import com.appointmentservice.appointment.exception.AppointmentNotFoundException;
 import com.appointmentservice.appointment.mapper.AppointmentMapper;
 import com.appointmentservice.appointment.model.Appointment;
 import com.appointmentservice.appointment.repository.AppointmentRepository;
@@ -146,5 +148,28 @@ public class AppointmentService {
         existingResheduledOrCancelledAppointment.setStatus(AppointmentStatus.NOT_VISITED);
 
         return appointmentRepository.save(existingResheduledOrCancelledAppointment);
+
+    }
+
+    public List<AppointmentResponseDTO> getAppointments() {
+        List<Appointment> appointments = appointmentRepository.findAll();
+
+        // Map each Appointment to AppointmentResponseDTO
+        return appointments.stream()
+                .map(appointment -> {
+                    SlotDTO slotDTO = slotServiceClient.getSlotById(appointment.getSlotId());
+                    PatientDTO patientDTO = patientServiceClient.getPatientById(appointment.getPatientId());
+                    DoctorDTO doctorDTO = doctorServiceClient.getDoctorById(appointment.getDoctorId());
+                    return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
+                })
+                .toList();
+    }
+
+    @Transactional
+    public void deleteAppointment(UUID appointmentId) {
+        if (!appointmentRepository.existsById(appointmentId)) {
+            throw new AppointmentNotFoundException("appointment with Id " + appointmentId + "not found");
+        }
+        appointmentRepository.deleteById(appointmentId);
     }
 }
