@@ -32,4 +32,12 @@ public class WebClientConfig {
                 .baseUrl(doctorServiceUrl)
                 .build();
     }
+
+    @Bean
+    @Qualifier("availabilityServiceClient")
+    public WebClient availabilityWebServiceClient(@Value("${availability.service.url}") String availabilityServiceUrl) {
+        return WebClient.builder()
+                .baseUrl(availabilityServiceUrl)
+                .build();
+    }
 }

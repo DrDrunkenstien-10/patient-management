@@ -1,11 +1,13 @@
 package com.scheduleservice.availability.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -42,6 +44,16 @@ public class AvailabilityController {
         return ResponseEntity.ok().body(availabilityResponseDTO);
     }
 
+    @GetMapping("/availability-id")
+    public ResponseEntity<UUID> getAvailabilityId(
+            @RequestParam(name = "doctorId") UUID doctorId,
+            @RequestParam(name = "slotId") UUID slotId,
+            @RequestParam(name = "date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
+        UUID availabilityId = availabilitiyService.getAvailibilityId(doctorId, slotId, date);
+        return ResponseEntity.ok(availabilityId);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<AvailabilityResponseDTO> updateAvailability(@PathVariable("id") UUID availabilityId,
             @Validated({ Default.class }) @RequestBody AvailabilityRequestDTO availabilityRequestDTO) {
@@ -55,5 +67,4 @@ public class AvailabilityController {
         availabilitiyService.deleteAvailability(availabilityId);
         return ResponseEntity.ok("Availability deleted successfully");
     }
-
 }

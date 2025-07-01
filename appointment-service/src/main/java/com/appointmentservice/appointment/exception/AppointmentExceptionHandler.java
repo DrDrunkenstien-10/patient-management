@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -53,5 +54,12 @@ public class AppointmentExceptionHandler {
         Map<String, String> errors = new HashMap<>();
         errors.put("message", "Slot not found");
         return ResponseEntity.badRequest().body(errors);
+    }
+
+    @ExceptionHandler(SlotCapacityExceededException.class)
+    public ResponseEntity<String> handleSlotCapacityExceeded(SlotCapacityExceededException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT) // 409 Conflict
+                .body(ex.getMessage());
     }
 }

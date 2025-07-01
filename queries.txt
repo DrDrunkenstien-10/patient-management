@@ -1,0 +1,20 @@
+Admin:
+SELECT * FROM admin.system_admin;
+
+SELECT * FROM staff.receptionist;
+
+SELECT * FROM staff.doctor;
+
+
+Appointment:
+SELECT * FROM appointment.appointment;
+
+Patient:
+SELECT * FROM patient.patient;
+
+Schedule:
+SELECT * FROM schedule.schedule;
+
+SELECT * FROM slot.slot;
+
+SELECT * FROM schedule.availability;

@@ -1,6 +1,5 @@
 package com.appointmentservice.appointment.mapper;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 

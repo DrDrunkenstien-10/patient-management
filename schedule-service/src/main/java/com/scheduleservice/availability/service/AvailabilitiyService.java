@@ -94,6 +94,17 @@ public class AvailabilitiyService {
         return AvailabilityMapper.toDto(updatedAvailability);
     }
 
+    public UUID getAvailibilityId(UUID doctorId, UUID slotId, LocalDate date) {
+        System.out.println("Doctor ID: " + doctorId);
+        System.out.println("Slot ID: " + slotId);
+        System.out.println("Date: " + date);
+
+        return availabiltyRepository.findIdByDocIdAndSlotIdAndDate(
+                doctorId, slotId, date).orElseThrow(
+                        () -> new AvailibilityExceptionHandler(
+                                "Availibility ID not found."));
+    }
+
     @Transactional
     public void deleteAvailability(UUID availabilityId) {
         Availability availability = availabiltyRepository.findById(availabilityId)
@@ -101,5 +112,4 @@ public class AvailabilitiyService {
                         "Availability not found with ID: " + availabilityId));
         availabiltyRepository.delete(availability);
     }
-
 }
