@@ -22,7 +22,7 @@ public class AppointmentRequestDTO {
     @NotNull(message = "Appointment Date is required")
     private LocalDate appointmentDate;
 
-    private LocalTime appointmenTime;
+    private LocalTime appointmentTime;
 
     private AppointmentStatus appointmentStatus;
 
@@ -61,12 +61,12 @@ public class AppointmentRequestDTO {
         this.appointmentDate = appointmentDate;
     }
 
-    public LocalTime getAppointmenTime() {
-        return appointmenTime;
+    public LocalTime getAppointmentTime() {
+        return appointmentTime;
     }
 
-    public void setAppointmenTime(LocalTime appointmenTime) {
-        this.appointmenTime = appointmenTime;
+    public void setAppointmentTime(LocalTime appointmentTime) {
+        this.appointmentTime = appointmentTime;
     }
 
     public AppointmentStatus getAppointmentStatus() {

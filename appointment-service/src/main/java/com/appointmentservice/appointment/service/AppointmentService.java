@@ -69,9 +69,9 @@ public class AppointmentService {
         DoctorDTO doctorDTO = doctorServiceClient.getDoctorById(appointmentRequestDTO.getDoctorId());
 
         if (existingResheduledOrCancelledAppointment.isPresent()) {
-            Appointment appointment = updateAppointment(appointmentRequestDTO,
+            Appointment appointment = updateAppointmentIfExistingResheduledOrCancelled(appointmentRequestDTO,
                     existingResheduledOrCancelledAppointment.get());
-            return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO); // ✅ Early return
+            return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
         }
 
         Appointment appointment;
@@ -88,7 +88,7 @@ public class AppointmentService {
         // LocalTime startTime = LocalTime.parse("11:00:00");
         LocalTime startTime = LocalTime.parse(slotDTO.getStartTime());
 
-        appointmentRequestDTO.setAppointmenTime(startTime);
+        appointmentRequestDTO.setAppointmentTime(startTime);
         appointmentRequestDTO.setAppointmentStatus(AppointmentStatus.NOT_VISITED);
         appointmentRequestDTO.setRank(1);
 
@@ -109,7 +109,7 @@ public class AppointmentService {
             // Increment appointment time by session duration
             appointmentTime = appointmentTime.plusMinutes(sessionDuration);
 
-            appointmentRequestDTO.setAppointmenTime(appointmentTime);
+            appointmentRequestDTO.setAppointmentTime(appointmentTime);
             appointmentRequestDTO.setAppointmentStatus(AppointmentStatus.NOT_VISITED);
             appointmentRequestDTO.setRank(rank + 1);
 
@@ -141,7 +141,7 @@ public class AppointmentService {
         }
     }
 
-    public Appointment updateAppointment(AppointmentRequestDTO appointmentRequestDTO,
+    public Appointment updateAppointmentIfExistingResheduledOrCancelled(AppointmentRequestDTO appointmentRequestDTO,
             Appointment existingResheduledOrCancelledAppointment) {
 
         existingResheduledOrCancelledAppointment.setPatientId(appointmentRequestDTO.getPatientId());
@@ -149,6 +149,43 @@ public class AppointmentService {
 
         return appointmentRepository.save(existingResheduledOrCancelledAppointment);
 
+    }
+
+    public AppointmentResponseDTO updateAppointment(UUID appointmentId, AppointmentRequestDTO appointmentRequestDTO) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(
+                        () -> new AppointmentNotFoundException("appointment with Id" + appointmentId + "not found"));
+
+        appointment.setAppointmentId(appointmentId);
+        appointment.setDoctorId(appointmentRequestDTO.getDoctorId());
+        appointment.setPatientId(appointmentRequestDTO.getPatientId());
+        appointment.setSlotId(appointmentRequestDTO.getSlotId());
+        appointment.setAppointmentTime(appointmentRequestDTO.getAppointmentTime());
+        appointment.setAppointmentDate(appointmentRequestDTO.getAppointmentDate());
+        appointment.setStatus(appointmentRequestDTO.getAppointmentStatus());
+        appointment.setRank(appointmentRequestDTO.getRank());
+
+        appointmentRepository.save(appointment);
+
+        return AppointmentMapper.toDto(appointment,
+                slotServiceClient.getSlotById(appointmentRequestDTO.getSlotId()),
+                doctorServiceClient.getDoctorById(appointmentRequestDTO.getDoctorId()),
+                patientServiceClient.getPatientById(appointmentRequestDTO.getPatientId()));
+    }
+
+    public AppointmentResponseDTO patchAppointmentStatus(UUID appointmentId, AppointmentStatus status) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(
+                        () -> new AppointmentNotFoundException("appointment with Id" + appointmentId + "not found"));
+        appointment.setAppointmentId(appointmentId);
+        appointment.setStatus(status);
+        appointmentRepository.save(appointment);
+
+        SlotDTO slotDTO = slotServiceClient.getSlotById(appointment.getSlotId());
+        PatientDTO patientDTO = patientServiceClient.getPatientById(appointment.getPatientId());
+        DoctorDTO doctorDTO = doctorServiceClient.getDoctorById(appointment.getDoctorId());
+
+        return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
     }
 
     public List<AppointmentResponseDTO> getAppointments() {
