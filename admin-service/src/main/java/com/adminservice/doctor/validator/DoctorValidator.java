@@ -1,5 +1,6 @@
 package com.adminservice.doctor.validator;
 
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
@@ -7,11 +8,17 @@ import org.springframework.stereotype.Component;
 import com.adminservice.doctor.dto.DoctorRequestDTO;
 import com.adminservice.doctor.exception.ContactPhoneAlreadyExistsException;
 import com.adminservice.doctor.exception.EmailAlreadyExistsException;
+import com.adminservice.doctor.exception.InvalidFilterCategoryException;
 import com.adminservice.doctor.exception.LicenseNumberAlreadyExistsException;
 import com.adminservice.doctor.repository.DoctorRepository;
 
 @Component
 public class DoctorValidator {
+
+    private static final Set<String> ALLOWED_FILTER_CATEGORIES = Set.of(
+            "name", "gender", "specialization", "qualification", "license_number",
+            "affiliated_hospital", "contact_email", "contact_phone",
+            "practice_location", "role_code", "doctor_id");
 
     private final DoctorRepository doctorRepository;
 
@@ -54,6 +61,12 @@ public class DoctorValidator {
         if (doctorRepository.existsByContactPhoneAndDoctorIdNot(doctorRequestDTO.getContactPhone(), doctorId)) {
             throw new ContactPhoneAlreadyExistsException(
                     "A Doctor with this contact phone already exists: " + doctorRequestDTO.getContactPhone());
+        }
+    }
+
+    public void validateFilterCategory(String category) {
+        if (!ALLOWED_FILTER_CATEGORIES.contains(category.toLowerCase())) {
+            throw new InvalidFilterCategoryException("Unsupported filter category: " + category);
         }
     }
 }

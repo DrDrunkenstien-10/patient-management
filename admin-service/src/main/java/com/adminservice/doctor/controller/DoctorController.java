@@ -1,16 +1,17 @@
 package com.adminservice.doctor.controller;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.adminservice.doctor.dto.DoctorRequestDTO;
 import com.adminservice.doctor.dto.DoctorResponseDTO;
+import com.adminservice.doctor.dto.PaginatedResponseDTO;
 import com.adminservice.doctor.service.DoctorService;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +21,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 
 import jakarta.validation.groups.Default;
-
 
 @RestController
 @RequestMapping("/doctors")
@@ -39,9 +39,28 @@ public class DoctorController {
     }
 
     @GetMapping
-    public ResponseEntity<List<DoctorResponseDTO>> getDoctors() {
-        List<DoctorResponseDTO> doctors = doctorService.getDoctors();
-        return ResponseEntity.ok().body(doctors);
+    public ResponseEntity<PaginatedResponseDTO<DoctorResponseDTO>> getDoctors(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy) {
+
+        PaginatedResponseDTO<DoctorResponseDTO> response = doctorService.getDoctors(page, size, sortBy);
+        return ResponseEntity.ok().body(response);
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<PaginatedResponseDTO<DoctorResponseDTO>> filterDoctor(
+            @RequestParam(name = "category", defaultValue = "name", required = true) String category,
+            @RequestParam(name = "value", defaultValue = "", required = false) String value,
+            @RequestParam(name = "direction", defaultValue = "asc") String direction,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy) {
+
+        PaginatedResponseDTO<DoctorResponseDTO> response = doctorService.filterDoctors(category, value, direction, page,
+                size, sortBy);
+
+        return ResponseEntity.ok().body(response);
     }
 
     @GetMapping("/{id}")

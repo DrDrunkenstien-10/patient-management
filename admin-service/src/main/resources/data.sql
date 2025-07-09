@@ -87,5 +87,26 @@
 
 -- -- Optional sample data
 
-INSERT INTO admin.system_admin (name, role, access_level, last_login)
-VALUES ('Alice Admin', 'system_admin', 'admin', NOW());
+-- INSERT INTO admin.system_admin (name, role, access_level, last_login)
+-- VALUES ('Alice Admin', 'system_admin', 'admin', NOW());
+
+-- INSERT INTO staff.doctor (
+--     name, gender, date_of_birth, qualification, specialization, license_number,
+--     affiliated_hospital, contact_email, contact_phone, practice_location, role_code
+-- )
+-- VALUES
+-- ('Dr. Alice Morgan', 'F', '1980-04-12', 'MBBS, MD', 'Cardiology', 'LIC123456', 'Central General Hospital', 'alice.morgan@example.com', '555-123-4567', '123 Heart St, New York, NY', 'DOC01'),
+-- ('Dr. Brian Chen', 'M', '1975-06-22', 'MBBS, MS', 'Orthopedics', 'LIC234567', 'Metro Care Center', 'brian.chen@example.com', '555-234-5678', '456 Bone Ave, Los Angeles, CA', 'DOC02'),
+-- ('Dr. Clara Singh', 'F', '1983-11-08', 'MBBS, MD', 'Dermatology', 'LIC345678', 'Sunshine Clinic', 'clara.singh@example.com', '555-345-6789', '789 Skin Dr, Chicago, IL', 'DOC03'),
+-- ('Dr. Daniel Roy', 'M', '1990-03-15', 'MBBS', 'Pediatrics', 'LIC456789', 'Children Health Hub', 'daniel.roy@example.com', '555-456-7890', '321 Kids Ln, Houston, TX', 'DOC04'),
+-- ('Dr. Emma Wright', 'F', '1985-09-20', 'MBBS, MD', 'Neurology', 'LIC567890', 'Brain Care Hospital', 'emma.wright@example.com', '555-567-8901', '654 Brain Blvd, Seattle, WA', 'DOC05'),
+-- ('Dr. Farhan Malik', 'M', '1979-01-11', 'MBBS, MS', 'General Surgery', 'LIC678901', 'City Hospital', 'farhan.malik@example.com', '555-678-9012', '987 Scalpel St, Miami, FL', 'DOC06'),
+-- ('Dr. Grace Lin', 'F', '1992-05-27', 'MBBS', 'Family Medicine', 'LIC789012', 'Wellness Center', 'grace.lin@example.com', '555-789-0123', '222 Family Rd, Denver, CO', 'DOC07'),
+-- ('Dr. Haruto Saito', 'M', '1987-07-19', 'MBBS, MD', 'Oncology', 'LIC890123', 'Cancer Care Institute', 'haruto.saito@example.com', '555-890-1234', '333 Cure Ave, Boston, MA', 'DOC08'),
+-- ('Dr. Irene Novak', 'F', '1991-12-05', 'MBBS', 'Internal Medicine', 'LIC901234', 'HealthFirst Hospital', 'irene.novak@example.com', '555-901-2345', '444 Vital St, San Diego, CA', 'DOC09'),
+-- ('Dr. John Park', 'M', '1982-02-17', 'MBBS, MS', 'Urology', 'LIC012345', 'Westside Medical Center', 'john.park@example.com', '555-012-3456', '555 Flow Rd, Austin, TX', 'DOC10'),
+-- ('Dr. Kavita Rao', 'F', '1978-08-30', 'MBBS, MD', 'Gynecology', 'LIC112233', 'Women’s Wellness Hospital', 'kavita.rao@example.com', '555-112-2334', '666 Blossom St, San Jose, CA', 'DOC11'),
+-- ('Dr. Leo Carter', 'M', '1986-04-10', 'MBBS, MD', 'Psychiatry', 'LIC223344', 'MindCare Clinic', 'leo.carter@example.com', '555-223-3445', '777 Calm Ln, Portland, OR', 'DOC12'),
+-- ('Dr. Maya Patel', 'F', '1993-10-25', 'MBBS', 'Ophthalmology', 'LIC334455', 'Vision Health Center', 'maya.patel@example.com', '555-334-4556', '888 Vision Blvd, Atlanta, GA', 'DOC13'),
+-- ('Dr. Nathan Blake', 'M', '1984-03-05', 'MBBS, MD', 'Endocrinology', 'LIC445566', 'Hormone Clinic', 'nathan.blake@example.com', '555-445-5667', '999 Hormone St, Phoenix, AZ', 'DOC14'),
+-- ('Dr. Olivia Zhang', 'F', '1989-06-18', 'MBBS', 'Emergency Medicine', 'LIC556677', 'Rapid Response Hospital', 'olivia.zhang@example.com', '555-556-6778', '101 ER Rd, Philadelphia, PA', 'DOC15');

@@ -3,9 +3,11 @@ package com.adminservice.doctor.repository;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
 import com.adminservice.doctor.model.Doctor;
 
-public interface DoctorRepository extends JpaRepository<Doctor, UUID> {
+public interface DoctorRepository extends JpaRepository<Doctor, UUID>, JpaSpecificationExecutor<Doctor> {
 
     boolean existsByContactEmail(String contactEmail);
 
