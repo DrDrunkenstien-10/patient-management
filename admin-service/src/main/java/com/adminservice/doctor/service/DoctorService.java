@@ -65,6 +65,9 @@ public class DoctorService {
             int page,
             int size,
             String sortBy) {
+
+        doctorValidator.validateFilterCategory(category);
+        
         Sort sort = direction.equalsIgnoreCase("desc")
                 ? Sort.by(sortBy).descending()
                 : Sort.by(sortBy).ascending();
