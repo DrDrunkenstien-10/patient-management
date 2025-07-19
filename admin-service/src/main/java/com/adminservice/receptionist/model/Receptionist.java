@@ -33,7 +33,7 @@ public class Receptionist {
     @Column(name = "gender", nullable = false)
     private Gender gender;
 
-    @Column(name = "date_of_birth")
+    @Column(name = "date_of_birth",nullable = false)
     private LocalDate dateOfBirth;
 
     @Column(name = "employee_code", nullable = false)

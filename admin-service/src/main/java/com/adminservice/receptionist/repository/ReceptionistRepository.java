@@ -3,10 +3,11 @@ package com.adminservice.receptionist.repository;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import com.adminservice.receptionist.model.Receptionist;
 
-public interface ReceptionistRepository extends JpaRepository<Receptionist, UUID> {
+public interface ReceptionistRepository extends JpaRepository<Receptionist, UUID>, JpaSpecificationExecutor<Receptionist> {
     boolean existsByEmployeeCode(String employeeCode);
 
     boolean existsByContactEmail(String contactEmail);

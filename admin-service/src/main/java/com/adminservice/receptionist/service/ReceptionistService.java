@@ -3,14 +3,22 @@ package com.adminservice.receptionist.service;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+
+import com.adminservice.receptionist.dto.PaginatedResponseDTO;
 import com.adminservice.receptionist.dto.ReceptionistRequestDTO;
 import com.adminservice.receptionist.dto.ReceptionistResponseDTO;
 import com.adminservice.receptionist.exception.ReceptionistNotFoundException;
 import com.adminservice.receptionist.mapper.ReceptionistMapper;
 import com.adminservice.receptionist.model.Receptionist;
 import com.adminservice.receptionist.repository.ReceptionistRepository;
+import com.adminservice.receptionist.specification.ReceptionistSpecification;
 import com.adminservice.receptionist.validator.ReceptionistValidator;
 
 import jakarta.transaction.Transactional;
@@ -34,13 +42,61 @@ public class ReceptionistService {
         return ReceptionistMapper.toDto(newReceptionist);
     }
 
-    public List<ReceptionistResponseDTO> getReceptionists() {
-        List<Receptionist> receptionists = receptionistRepository.findAll();
+    // public List<ReceptionistResponseDTO> getReceptionists() {
+    //     List<Receptionist> receptionists = receptionistRepository.findAll();
 
-        List<ReceptionistResponseDTO> receptionistResponseDTOs = receptionists.stream()
-                .map(receptionist -> ReceptionistMapper.toDto(receptionist)).toList();
+    //     List<ReceptionistResponseDTO> receptionistResponseDTOs = receptionists.stream()
+    //             .map(receptionist -> ReceptionistMapper.toDto(receptionist)).toList();
 
-        return receptionistResponseDTOs;
+    //     return receptionistResponseDTOs;
+    // }
+
+      public PaginatedResponseDTO<ReceptionistResponseDTO> getReceptionists(int page, int size, String sortBy) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+
+        Page<Receptionist> receptionists = receptionistRepository.findAll(pageable);
+
+        List<ReceptionistResponseDTO> receptionistResponseDTOs = receptionists.stream().map(receptionist -> ReceptionistMapper.toDto(receptionist))
+                .toList();
+
+        return new PaginatedResponseDTO<>(
+                receptionistResponseDTOs,
+                receptionists.getNumber(),
+                receptionists.getSize(),
+                receptionists.getTotalElements(),
+                receptionists.getTotalPages(),
+                receptionists.isLast(),
+                receptionists.isFirst());
+    }
+
+     public PaginatedResponseDTO<ReceptionistResponseDTO> filterReceptionists(
+            String category,
+            String value,
+            String direction,
+            int page,
+            int size,
+            String sortBy) {
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Specification<Receptionist> spec = ReceptionistSpecification.getReceptionistSpecification(category, value);
+
+        Page<Receptionist> receptionists = receptionistRepository.findAll(spec, pageable);
+
+        List<ReceptionistResponseDTO> receptionistResponseDTOs = receptionists.stream().map(receptionist -> ReceptionistMapper.toDto(receptionist))
+                .toList();
+
+        return new PaginatedResponseDTO<>(
+                receptionistResponseDTOs,
+                receptionists.getNumber(),
+                receptionists.getSize(),
+                receptionists.getTotalElements(),
+                receptionists.getTotalPages(),
+                receptionists.isLast(),
+                receptionists.isFirst());
     }
 
     public ReceptionistResponseDTO getReceptionistById(UUID receptionistId) {
