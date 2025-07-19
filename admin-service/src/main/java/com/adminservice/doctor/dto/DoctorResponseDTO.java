@@ -13,12 +13,12 @@ public class DoctorResponseDTO {
     private LocalDate dateOfBirth;
     private String qualification;
     private String specialization;
-    private String license_number;
-    private String affiliated_hospital;
-    private String contact_email;
-    private String contact_phone;
-    private String practice_location;
-    private String role_code;
+    private String licenseNumber;
+    private String affiliatedHospital;
+    private String contactEmail;
+    private String contactPhone;
+    private String practiceLocation;
+    private String roleCode;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
@@ -71,52 +71,52 @@ public class DoctorResponseDTO {
         this.specialization = specialization;
     }
 
-    public String getLicense_number() {
-        return license_number;
+    public String getLicenseNumber() {
+        return licenseNumber;
     }
 
-    public void setLicense_number(String license_number) {
-        this.license_number = license_number;
+    public void setLicenseNumber(String licenseNumber) {
+        this.licenseNumber = licenseNumber;
     }
 
-    public String getAffiliated_hospital() {
-        return affiliated_hospital;
+    public String getAffiliatedHospital() {
+        return affiliatedHospital;
     }
 
-    public void setAffiliated_hospital(String affiliated_hospital) {
-        this.affiliated_hospital = affiliated_hospital;
+    public void setAffiliatedHospital(String affiliatedHospital) {
+        this.affiliatedHospital = affiliatedHospital;
     }
 
-    public String getContact_email() {
-        return contact_email;
+    public String getContactEmail() {
+        return contactEmail;
     }
 
-    public void setContact_email(String contact_email) {
-        this.contact_email = contact_email;
+    public void setContactEmail(String contactEmail) {
+        this.contactEmail = contactEmail;
     }
 
-    public String getContact_phone() {
-        return contact_phone;
+    public String getContactPhone() {
+        return contactPhone;
     }
 
-    public void setContact_phone(String contact_phone) {
-        this.contact_phone = contact_phone;
+    public void setContactPhone(String contactPhone) {
+        this.contactPhone = contactPhone;
     }
 
-    public String getPractice_location() {
-        return practice_location;
+    public String getPracticeLocation() {
+        return practiceLocation;
     }
 
-    public void setPractice_location(String practice_location) {
-        this.practice_location = practice_location;
+    public void setPracticeLocation(String practiceLocation) {
+        this.practiceLocation = practiceLocation;
     }
 
-    public String getRole_code() {
-        return role_code;
+    public String getRoleCode() {
+        return roleCode;
     }
 
-    public void setRole_code(String role_code) {
-        this.role_code = role_code;
+    public void setRoleCode(String roleCode) {
+        this.roleCode = roleCode;
     }
 
     public OffsetDateTime getCreatedAt() {
@@ -134,6 +134,4 @@ public class DoctorResponseDTO {
     public void setUpdatedAt(OffsetDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
-
-    
 }

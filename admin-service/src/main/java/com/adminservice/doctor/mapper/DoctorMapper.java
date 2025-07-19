@@ -15,12 +15,12 @@ public class DoctorMapper {
         doctorResponseDTO.setDateOfBirth(doctor.getDateOfBirth());
         doctorResponseDTO.setQualification(doctor.getQualification());
         doctorResponseDTO.setSpecialization(doctor.getSpecialization());
-        doctorResponseDTO.setAffiliated_hospital(doctor.getAffiliatedHospital());
-        doctorResponseDTO.setLicense_number(doctor.getLicenseNumber());
-        doctorResponseDTO.setPractice_location(doctor.getPracticeLocation());
-        doctorResponseDTO.setContact_email(doctor.getContactEmail());
-        doctorResponseDTO.setContact_phone(doctor.getContactPhone());
-        doctorResponseDTO.setRole_code(doctor.getRoleCode());
+        doctorResponseDTO.setAffiliatedHospital(doctor.getAffiliatedHospital());
+        doctorResponseDTO.setLicenseNumber(doctor.getLicenseNumber());
+        doctorResponseDTO.setPracticeLocation(doctor.getPracticeLocation());
+        doctorResponseDTO.setContactEmail(doctor.getContactEmail());
+        doctorResponseDTO.setContactPhone(doctor.getContactPhone());
+        doctorResponseDTO.setRoleCode(doctor.getRoleCode());
         doctorResponseDTO.setCreatedAt(doctor.getCreatedAt());
         doctorResponseDTO.setUpdatedAt(doctor.getUpdatedAt());
 
