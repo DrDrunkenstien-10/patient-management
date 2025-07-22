@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 import com.scheduleservice.availability.model.Availability;
 
 public interface AvailabiltyRepository extends JpaRepository<Availability, UUID> {
-    @Query("SELECT a.id FROM Availability a WHERE a.docId = :docId AND a.slotId = :slotId AND a.date = :date")
+    @Query("SELECT a.id FROM Availability a WHERE a.docId = :docId AND a.slot.slotId = :slotId AND a.date = :date")
     Optional<UUID> findIdByDocIdAndSlotIdAndDate(
             @Param("docId") UUID docId,
             @Param("slotId") UUID slotId,

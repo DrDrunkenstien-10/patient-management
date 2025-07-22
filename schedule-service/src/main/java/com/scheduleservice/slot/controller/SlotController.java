@@ -1,6 +1,5 @@
 package com.scheduleservice.slot.controller;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
@@ -12,8 +11,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.scheduleservice.slot.dto.PaginatedResponseDTO;
 import com.scheduleservice.slot.dto.SlotRequestDTO;
 import com.scheduleservice.slot.dto.SlotResponseDTO;
 import com.scheduleservice.slot.service.SlotService;
@@ -30,8 +31,28 @@ public class SlotController {
     }
 
     @GetMapping
-    public ResponseEntity<List<SlotResponseDTO>> getSlots() {
-        List<SlotResponseDTO> slots = slotService.getSlots();
+    public ResponseEntity<PaginatedResponseDTO<SlotResponseDTO>> getSlots(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy) {
+
+        PaginatedResponseDTO<SlotResponseDTO> slots = slotService.getSlots(page, size, sortBy);
+
+        return ResponseEntity.ok().body(slots);
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<PaginatedResponseDTO<SlotResponseDTO>> filterSlot(
+            @RequestParam(name = "category", defaultValue = "name", required = true) String category,
+            @RequestParam(name = "value", defaultValue = "", required = false) String value,
+            @RequestParam(name = "direction", defaultValue = "asc") String direction,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy) {
+
+        PaginatedResponseDTO<SlotResponseDTO> slots = slotService
+                .filterSlots(category, value, direction, page, size, sortBy);
+
         return ResponseEntity.ok().body(slots);
     }
 

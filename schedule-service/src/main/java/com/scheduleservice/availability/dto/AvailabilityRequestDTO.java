@@ -1,6 +1,5 @@
 package com.scheduleservice.availability.dto;
 
-
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -14,6 +13,9 @@ public class AvailabilityRequestDTO {
 
     @NotNull
     private UUID slotId;
+
+    @NotNull
+    private UUID scheduleId;
 
     @NotNull
     private LocalDate date;
@@ -33,7 +35,7 @@ public class AvailabilityRequestDTO {
     public void setAvailabilityId(UUID availabilityId) {
         this.availabilityId = availabilityId;
     }
-    
+
     public UUID getDocId() {
         return docId;
     }
@@ -48,6 +50,14 @@ public class AvailabilityRequestDTO {
 
     public void setSlotId(UUID slotId) {
         this.slotId = slotId;
+    }
+
+    public UUID getScheduleId() {
+        return scheduleId;
+    }
+
+    public void setScheduleId(UUID scheduleId) {
+        this.scheduleId = scheduleId;
     }
 
     public LocalDate getDate() {
@@ -73,5 +83,4 @@ public class AvailabilityRequestDTO {
     public void setUnavailabilityReason(String unavailabilityReason) {
         this.unavailabilityReason = unavailabilityReason;
     }
-    
 }

@@ -10,5 +10,5 @@ import com.scheduleservice.schedule.model.Schedule;
 public interface ScheduleRepository extends JpaRepository<Schedule, UUID> {
     boolean existsByDocId(UUID docId);
 
-    List<ScheduleDateRange> findByDocId(UUID docId);
+    List<Schedule> findByDocId(UUID docId);
 }

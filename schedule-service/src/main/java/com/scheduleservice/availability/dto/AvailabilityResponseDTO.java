@@ -5,12 +5,15 @@ public class AvailabilityResponseDTO {
     private String availabilityId;
     private String docId;
     private String slotId;
+    private String scheduleId;
     private String date;
     private Boolean availability;
     private String unavailabilityReason;
+    private String slotName;
+    private String startTime;
+    private String endTime;
 
     // Getters and Setters
-
     public String getAvailabilityId() {
         return availabilityId;
     }
@@ -33,6 +36,14 @@ public class AvailabilityResponseDTO {
 
     public void setSlotId(String slotId) {
         this.slotId = slotId;
+    }
+
+    public String getScheduleId() {
+        return scheduleId;
+    }
+
+    public void setScheduleId(String scheduleId) {
+        this.scheduleId = scheduleId;
     }
 
     public String getDate() {
@@ -59,4 +70,27 @@ public class AvailabilityResponseDTO {
         this.unavailabilityReason = unavailabilityReason;
     }
 
+    public String getSlotName() {
+        return slotName;
+    }
+
+    public void setSlotName(String slotName) {
+        this.slotName = slotName;
+    }
+
+    public String getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
+    }
+
+    public String getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
+    }
 }

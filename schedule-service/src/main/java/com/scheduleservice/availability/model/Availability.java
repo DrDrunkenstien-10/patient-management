@@ -4,13 +4,19 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import com.scheduleservice.schedule.model.Schedule;
+import com.scheduleservice.slot.model.Slot;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-
+import jakarta.persistence.ForeignKey;
 
 @Entity
 @Table(name = "availability", schema = "schedule")
@@ -24,8 +30,13 @@ public class Availability {
     @Column(name = "doc_id")
     private UUID docId;
 
-    @Column(name = "slot_id")
-    private UUID slotId;
+    @ManyToOne(fetch = FetchType.LAZY) // Lazy by default to avoid loading Slot unless needed
+    @JoinColumn(name = "slot_id", referencedColumnName = "slot_id", foreignKey = @ForeignKey(name = "fk_availability_slot"))
+    private Slot slot;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "schedule_id", foreignKey = @ForeignKey(name = "fk_availability_schedule"))
+    private Schedule schedule;
 
     @Column(name = "date")
     private LocalDate date;
@@ -60,12 +71,12 @@ public class Availability {
         this.docId = docId;
     }
 
-    public UUID getSlotId() {
-        return slotId;
+    public Slot getSlot() {
+        return slot;
     }
 
-    public void setSlotId(UUID slotId) {
-        this.slotId = slotId;
+    public void setSlot(Slot slot) {
+        this.slot = slot;
     }
 
     public LocalDate getDate() {
@@ -108,7 +119,11 @@ public class Availability {
         this.updatedAt = updatedAt;
     }
 
-    // Getters and setters...
+    public Schedule getSchedule() {
+        return schedule;
+    }
 
-    
+    public void setSchedule(Schedule schedule) {
+        this.schedule = schedule;
+    }
 }

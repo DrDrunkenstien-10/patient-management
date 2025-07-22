@@ -3,15 +3,22 @@ package com.scheduleservice.slot.service;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.scheduleservice.availability.service.AvailabilitiyService;
+import com.scheduleservice.slot.dto.PaginatedResponseDTO;
 import com.scheduleservice.slot.dto.SlotRequestDTO;
 import com.scheduleservice.slot.dto.SlotResponseDTO;
 import com.scheduleservice.slot.exception.SlotNotFoundException;
 import com.scheduleservice.slot.mapper.SlotMapper;
 import com.scheduleservice.slot.model.Slot;
 import com.scheduleservice.slot.repository.SlotRepository;
+import com.scheduleservice.slot.specification.SlotSpecification;
 import com.scheduleservice.slot.validator.SlotValidator;
 
 import jakarta.transaction.Transactional;
@@ -47,14 +54,56 @@ public class SlotService {
         return slotResponseDTO;
     }
 
-    public List<SlotResponseDTO> getSlots() {
-        List<Slot> slots = slotRepository.findAll();
+    public PaginatedResponseDTO<SlotResponseDTO> getSlots(int page, int size, String sortBy) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+
+        Page<Slot> slots = slotRepository.findAll(pageable);
 
         List<SlotResponseDTO> slotResponseDTOs = slots.stream()
                 .map(slot -> SlotMapper.toDto(slot))
                 .toList();
 
-        return slotResponseDTOs;
+        return new PaginatedResponseDTO<>(
+                slotResponseDTOs,
+                slots.getNumber(),
+                slots.getSize(),
+                slots.getTotalElements(),
+                slots.getTotalPages(),
+                slots.isLast(),
+                slots.isFirst());
+    }
+
+    public PaginatedResponseDTO<SlotResponseDTO> filterSlots(
+            String category,
+            String value,
+            String direction,
+            int page,
+            int size,
+            String sortBy) {
+
+        slotValidator.validateFilterCategory(category);
+
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Specification<Slot> spec = SlotSpecification.getSlotSpecification(category, value);
+
+        Page<Slot> slots = slotRepository.findAll(spec, pageable);
+
+        List<SlotResponseDTO> slotResponseDTOs = slots.stream().map(slot -> SlotMapper.toDto(slot))
+                .toList();
+
+        return new PaginatedResponseDTO<>(
+                slotResponseDTOs,
+                slots.getNumber(),
+                slots.getSize(),
+                slots.getTotalElements(),
+                slots.getTotalPages(),
+                slots.isLast(),
+                slots.isFirst());
     }
 
     public SlotResponseDTO getSlotById(UUID slotId) {
