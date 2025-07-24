@@ -13,13 +13,17 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import com.scheduleservice.availability.dto.AvailabilityCreateRequestDTO;
+import com.scheduleservice.availability.dto.AvailabilityCreateResponseDTO;
 import com.scheduleservice.availability.dto.AvailabilityRequestDTO;
 import com.scheduleservice.availability.dto.AvailabilityResponseDTO;
 import com.scheduleservice.availability.service.AvailabilitiyService;
 
+import jakarta.validation.Valid;
 import jakarta.validation.groups.Default;
 
 @RestController
@@ -30,6 +34,15 @@ public class AvailabilityController {
 
     public AvailabilityController(AvailabilitiyService availabilitiyService) {
         this.availabilitiyService = availabilitiyService;
+    }
+
+    @PostMapping
+    public ResponseEntity<AvailabilityCreateResponseDTO> createAvailability(
+            @RequestBody @Valid AvailabilityCreateRequestDTO availabilityCreateRequestDTO) {
+        AvailabilityCreateResponseDTO availabilityCreateResponseDTO = availabilitiyService
+                .createAvailability(availabilityCreateRequestDTO);
+
+        return ResponseEntity.ok().body(availabilityCreateResponseDTO);
     }
 
     @GetMapping

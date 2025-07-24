@@ -10,7 +10,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import com.scheduleservice.availability.service.AvailabilitiyService;
 import com.scheduleservice.slot.dto.PaginatedResponseDTO;
 import com.scheduleservice.slot.dto.SlotRequestDTO;
 import com.scheduleservice.slot.dto.SlotResponseDTO;
@@ -27,14 +26,12 @@ import jakarta.transaction.Transactional;
 public class SlotService {
     private final CapacityCalculator capacityCalculator;
     private final SlotRepository slotRepository;
-    private final AvailabilitiyService availabilitiyService;
     private final SlotValidator slotValidator;
 
     public SlotService(CapacityCalculator capacityCalculator, SlotRepository slotRepository,
-            AvailabilitiyService availabilitiyService, SlotValidator slotValidator) {
+            SlotValidator slotValidator) {
         this.capacityCalculator = capacityCalculator;
         this.slotRepository = slotRepository;
-        this.availabilitiyService = availabilitiyService;
         this.slotValidator = slotValidator;
     }
 
@@ -48,8 +45,6 @@ public class SlotService {
         Slot newSlot = slotRepository.save(SlotMapper.toModel(slotRequestDTO));
 
         SlotResponseDTO slotResponseDTO = SlotMapper.toDto(newSlot);
-
-        availabilitiyService.createAvailability(slotResponseDTO);
 
         return slotResponseDTO;
     }

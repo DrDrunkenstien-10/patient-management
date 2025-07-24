@@ -8,6 +8,8 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.scheduleservice.availability.dto.AvailabilityCreateRequestDTO;
+import com.scheduleservice.availability.dto.AvailabilityCreateResponseDTO;
 import com.scheduleservice.availability.dto.AvailabilityRequestDTO;
 import com.scheduleservice.availability.dto.AvailabilityResponseDTO;
 import com.scheduleservice.availability.exception.AvailibilityExceptionHandler;
@@ -17,7 +19,6 @@ import com.scheduleservice.availability.repository.AvailabiltyRepository;
 import com.scheduleservice.schedule.exception.ScheduleNotFoundException;
 import com.scheduleservice.schedule.model.Schedule;
 import com.scheduleservice.schedule.repository.ScheduleRepository;
-import com.scheduleservice.slot.dto.SlotResponseDTO;
 import com.scheduleservice.slot.exception.SlotNotFoundException;
 import com.scheduleservice.slot.model.Slot;
 import com.scheduleservice.slot.repository.SlotRepository;
@@ -39,27 +40,37 @@ public class AvailabilitiyService {
         this.slotRepository = slotRepository;
     }
 
-    public void createAvailability(SlotResponseDTO slotResponseDTO) {
-        UUID doctorId = slotResponseDTO.getDoctorId();
-        UUID slotId = slotResponseDTO.getSlotId();
+    public AvailabilityCreateResponseDTO createAvailability(AvailabilityCreateRequestDTO dto) {
+        UUID doctorId = dto.getDoctorId();
 
-        Slot slot = slotRepository.findById(slotId)
-                .orElseThrow(() -> new SlotNotFoundException("Slot not found with id: " + slotId));
+        // 1. Create the Schedule
+        Schedule newSchedule = new Schedule();
 
-        List<Schedule> schedules = scheduleRepository.findByDocId(doctorId);
+        newSchedule.setDocId(dto.getDoctorId());
+        newSchedule.setStartDate(dto.getStartDate());
+        newSchedule.setEndDate(dto.getEndDate());
+        newSchedule.setScheduleType(dto.getScheduleType());
+        newSchedule.setCreatedAt(OffsetDateTime.now());
+        newSchedule.setUpdatedAt(OffsetDateTime.now());
+
+        newSchedule = scheduleRepository.save(newSchedule);
+
+        // 2. Get the Slots
+        List<Slot> slots = slotRepository.findAllById(dto.getSlotIds());
+        if (slots.size() != dto.getSlotIds().size()) {
+            throw new SlotNotFoundException("One or more slot IDs are invalid");
+        }
 
         List<Availability> availabilitiesToSave = new ArrayList<>();
 
-        for (Schedule schedule : schedules) {
-            LocalDate start = schedule.getStartDate();
-            LocalDate end = schedule.getEndDate();
-
-            for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
+        // 3. For each date in the range, create Availability for each slot
+        for (LocalDate date = dto.getStartDate(); !date.isAfter(dto.getEndDate()); date = date.plusDays(1)) {
+            for (Slot slot : slots) {
                 Availability availability = new Availability();
 
                 availability.setDocId(doctorId);
+                availability.setSchedule(newSchedule);
                 availability.setSlot(slot);
-                availability.setSchedule(schedule); // ✅ set the schedule
                 availability.setDate(date);
                 availability.setAvailability(true);
                 availability.setUnavailabilityReason(null);
@@ -72,6 +83,17 @@ public class AvailabilitiyService {
         }
 
         availabiltyRepository.saveAll(availabilitiesToSave);
+
+        AvailabilityCreateResponseDTO availabilityCreateResponseDTO = new AvailabilityCreateResponseDTO();
+
+        availabilityCreateResponseDTO.setDoctorId(doctorId);
+        availabilityCreateResponseDTO.setScheduleId(newSchedule.getScheduleId());
+        availabilityCreateResponseDTO.setScheduleType(dto.getScheduleType());
+        availabilityCreateResponseDTO.setSlotIds(dto.getSlotIds());
+        availabilityCreateResponseDTO.setStartDate(dto.getStartDate());
+        availabilityCreateResponseDTO.setEndDate(dto.getEndDate());
+
+        return availabilityCreateResponseDTO;
     }
 
     public List<AvailabilityResponseDTO> getAvailabilities() {
