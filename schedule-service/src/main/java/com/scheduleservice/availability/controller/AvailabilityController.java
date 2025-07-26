@@ -12,14 +12,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.scheduleservice.availability.dto.AvailabilityCreateRequestDTO;
 import com.scheduleservice.availability.dto.AvailabilityCreateResponseDTO;
-import com.scheduleservice.availability.dto.AvailabilityRequestDTO;
+import com.scheduleservice.availability.dto.AvailabilityPatchDTO;
 import com.scheduleservice.availability.dto.AvailabilityResponseDTO;
 import com.scheduleservice.availability.service.AvailabilitiyService;
 
@@ -67,11 +67,11 @@ public class AvailabilityController {
         return ResponseEntity.ok(availabilityId);
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<AvailabilityResponseDTO> updateAvailability(@PathVariable("id") UUID availabilityId,
-            @Validated({ Default.class }) @RequestBody AvailabilityRequestDTO availabilityRequestDTO) {
+            @Validated({ Default.class }) @RequestBody AvailabilityPatchDTO availabilityPatchDTO) {
         AvailabilityResponseDTO availabilityResponseDTO = availabilitiyService.updateAvailability(availabilityId,
-                availabilityRequestDTO);
+                availabilityPatchDTO);
         return ResponseEntity.ok().body(availabilityResponseDTO);
     }
 

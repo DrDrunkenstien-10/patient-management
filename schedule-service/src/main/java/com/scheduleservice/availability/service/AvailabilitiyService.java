@@ -10,13 +10,12 @@ import org.springframework.stereotype.Service;
 
 import com.scheduleservice.availability.dto.AvailabilityCreateRequestDTO;
 import com.scheduleservice.availability.dto.AvailabilityCreateResponseDTO;
-import com.scheduleservice.availability.dto.AvailabilityRequestDTO;
+import com.scheduleservice.availability.dto.AvailabilityPatchDTO;
 import com.scheduleservice.availability.dto.AvailabilityResponseDTO;
 import com.scheduleservice.availability.exception.AvailibilityExceptionHandler;
 import com.scheduleservice.availability.mapper.AvailabilityMapper;
 import com.scheduleservice.availability.model.Availability;
 import com.scheduleservice.availability.repository.AvailabiltyRepository;
-import com.scheduleservice.schedule.exception.ScheduleNotFoundException;
 import com.scheduleservice.schedule.model.Schedule;
 import com.scheduleservice.schedule.repository.ScheduleRepository;
 import com.scheduleservice.slot.exception.SlotNotFoundException;
@@ -113,32 +112,6 @@ public class AvailabilitiyService {
         return AvailabilityMapper.toDto(availability);
     }
 
-    public AvailabilityResponseDTO updateAvailability(UUID availabilityId,
-            AvailabilityRequestDTO availabilityRequestDTO) {
-        Availability availability = availabiltyRepository.findById(availabilityId)
-                .orElseThrow(() -> new AvailibilityExceptionHandler(
-                        "Availability not found with ID: " + availabilityId));
-
-        Schedule schedule = scheduleRepository.findById(availabilityRequestDTO.getScheduleId())
-                .orElseThrow(() -> new ScheduleNotFoundException(
-                        "Schedule not found with id: " + availabilityRequestDTO.getScheduleId()));
-
-        Slot slot = slotRepository.findById(availabilityRequestDTO.getSlotId())
-                .orElseThrow(() -> new SlotNotFoundException(
-                        "Slot not found with id: " + availabilityRequestDTO.getSlotId()));
-
-        availability.setDocId(availabilityRequestDTO.getDocId());
-        availability.setSlot(slot);
-        availability.setSchedule(schedule);
-        availability.setDate(availabilityRequestDTO.getDate());
-        availability.setAvailability(availabilityRequestDTO.getAvailability());
-        availability.setUnavailabilityReason(availabilityRequestDTO.getUnavailabilityReason());
-
-        Availability updatedAvailability = availabiltyRepository.save(availability);
-
-        return AvailabilityMapper.toDto(updatedAvailability);
-    }
-
     public UUID getAvailibilityId(UUID doctorId, UUID slotId, LocalDate date) {
         System.out.println("Doctor ID: " + doctorId);
         System.out.println("Slot ID: " + slotId);
@@ -148,6 +121,24 @@ public class AvailabilitiyService {
                 doctorId, slotId, date).orElseThrow(
                         () -> new AvailibilityExceptionHandler(
                                 "Availibility ID not found."));
+    }
+
+    public AvailabilityResponseDTO updateAvailability(UUID availabilityId,
+            AvailabilityPatchDTO patchDTO) {
+        Availability availability = availabiltyRepository.findById(availabilityId)
+                .orElseThrow(() -> new AvailibilityExceptionHandler(
+                        "Availability not found with ID: " + availabilityId));
+
+        if (patchDTO.getAvailability() != null) {
+            availability.setAvailability(patchDTO.getAvailability());
+        }
+
+        if (patchDTO.getUnavailabilityReason() != null) {
+            availability.setUnavailabilityReason(patchDTO.getUnavailabilityReason());
+        }
+
+        Availability updatedAvailability = availabiltyRepository.save(availability);
+        return AvailabilityMapper.toDto(updatedAvailability);
     }
 
     @Transactional

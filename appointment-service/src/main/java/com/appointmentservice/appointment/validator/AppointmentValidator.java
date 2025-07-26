@@ -1,5 +1,7 @@
 package com.appointmentservice.appointment.validator;
 
+import java.util.Set;
+
 import org.springframework.stereotype.Component;
 
 import com.appointmentservice.appointment.client.service.DoctorServiceClient;
@@ -8,12 +10,18 @@ import com.appointmentservice.appointment.client.service.SlotServiceClient;
 import com.appointmentservice.appointment.dto.AppointmentRequestDTO;
 import com.appointmentservice.appointment.exception.AppointmentExistsException;
 import com.appointmentservice.appointment.exception.DoctorNotFoundException;
+import com.appointmentservice.appointment.exception.InvalidFilterCategoryException;
 import com.appointmentservice.appointment.exception.PatientNotFoundException;
 import com.appointmentservice.appointment.exception.SlotNotFoundException;
 import com.appointmentservice.appointment.repository.AppointmentRepository;
 
 @Component
 public class AppointmentValidator {
+
+    private static final Set<String> ALLOWED_FILTER_CATEGORIES = Set.of(
+            "appointment_id", "doctor_id", "patient_id", "slot_id", "appointment_time",
+            "status", "rank", "appointment_date");
+
     private final DoctorServiceClient doctorServiceClient;
     private final PatientServiceClient patientServiceClient;
     private final SlotServiceClient slotServiceClient;
@@ -41,12 +49,18 @@ public class AppointmentValidator {
         if (!slotServiceClient.isSlotExists(appointmentRequestDTO.getSlotId())) {
             throw new SlotNotFoundException("Slot not found");
         }
-        if (!appointmentRepository.existsByDoctorIdAndPatientIdAndSlotIdAndAppointmentDate(
+        if (appointmentRepository.existsByDoctorIdAndPatientIdAndSlotIdAndAppointmentDate(
                 appointmentRequestDTO.getDoctorId(),
                 appointmentRequestDTO.getSlotId(),
                 appointmentRequestDTO.getPatientId(),
                 appointmentRequestDTO.getAppointmentDate())) {
             throw new AppointmentExistsException("appointment exists for the doctor at the slot and date");
+        }
+    }
+
+    public void validateFilterCategory(String category) {
+        if (!ALLOWED_FILTER_CATEGORIES.contains(category.toLowerCase())) {
+            throw new InvalidFilterCategoryException("Unsupported filter category: " + category);
         }
     }
 }

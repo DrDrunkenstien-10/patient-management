@@ -7,6 +7,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,12 +25,14 @@ import com.appointmentservice.appointment.client.service.PatientServiceClient;
 import com.appointmentservice.appointment.client.service.SlotServiceClient;
 import com.appointmentservice.appointment.dto.AppointmentRequestDTO;
 import com.appointmentservice.appointment.dto.AppointmentResponseDTO;
+import com.appointmentservice.appointment.dto.PaginatedResponseDTO;
 import com.appointmentservice.appointment.enums.AppointmentStatus;
 import com.appointmentservice.appointment.exception.SlotCapacityExceededException;
 import com.appointmentservice.appointment.exception.AppointmentNotFoundException;
 import com.appointmentservice.appointment.mapper.AppointmentMapper;
 import com.appointmentservice.appointment.model.Appointment;
 import com.appointmentservice.appointment.repository.AppointmentRepository;
+import com.appointmentservice.appointment.specification.AppointmentSpecification;
 import com.appointmentservice.appointment.validator.AppointmentValidator;
 
 @Service
@@ -126,14 +133,10 @@ public class AppointmentService {
 
             AvailabilityDTO availabilityDTO = new AvailabilityDTO();
 
-            availabilityDTO.setAvailabilityId(availabilityId);
-            availabilityDTO.setDocId(doctorId);
-            availabilityDTO.setSlotId(slotId);
-            availabilityDTO.setDate(date);
             availabilityDTO.setAvailability(availability);
             availabilityDTO.setUnavailabilityReason(unAvailabilityReason);
 
-            availabilityServiceClient.updateAvailabilityStatus(availabilityDTO);
+            availabilityServiceClient.updateAvailabilityStatus(availabilityDTO, availabilityId);
 
             throw new SlotCapacityExceededException(
                     "No available appointments: slot capacity of " + capacity + " reached for slotId "
@@ -149,6 +152,72 @@ public class AppointmentService {
 
         return appointmentRepository.save(existingResheduledOrCancelledAppointment);
 
+    }
+
+    public PaginatedResponseDTO<AppointmentResponseDTO> getAppointments(int page, int size,
+            String sortBy) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+
+        Page<Appointment> appointments = appointmentRepository.findAll(pageable);
+
+        List<AppointmentResponseDTO> appointmentResponseDTOs = appointments.stream()
+                .map(appointment -> {
+                    SlotDTO slotDTO = slotServiceClient.getSlotById(appointment.getSlotId());
+                    PatientDTO patientDTO = patientServiceClient.getPatientById(appointment.getPatientId());
+                    DoctorDTO doctorDTO = doctorServiceClient.getDoctorById(appointment.getDoctorId());
+                    return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
+                })
+                .toList();
+
+        return new PaginatedResponseDTO<>(
+                appointmentResponseDTOs,
+                appointments.getNumber(),
+                appointments.getSize(),
+                appointments.getTotalElements(),
+                appointments.getTotalPages(),
+                appointments.isLast(),
+                appointments.isFirst());
+    }
+
+    public PaginatedResponseDTO<AppointmentResponseDTO> filterAppointments(
+            String category,
+            String value,
+            String direction,
+            int page,
+            int size,
+            String sortBy) {
+
+        appointmentValidator.validateFilterCategory(category);
+
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Specification<Appointment> spec = AppointmentSpecification
+                .getAppointmentSpecification(category, value);
+
+        Page<Appointment> appointments = appointmentRepository.findAll(spec, pageable);
+
+        List<AppointmentResponseDTO> appointmentResponseDTOs = appointments.stream()
+                .map(appointment -> {
+                    SlotDTO slotDTO = slotServiceClient.getSlotById(appointment.getSlotId());
+                    PatientDTO patientDTO = patientServiceClient.getPatientById(appointment.getPatientId());
+                    DoctorDTO doctorDTO = doctorServiceClient.getDoctorById(appointment.getDoctorId());
+                    return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
+                })
+                .toList();
+
+        return new PaginatedResponseDTO<>(
+                appointmentResponseDTOs,
+                appointments.getNumber(),
+                appointments.getSize(),
+                appointments.getTotalElements(),
+                appointments.getTotalPages(),
+                appointments.isLast(),
+                appointments.isFirst());
     }
 
     public AppointmentResponseDTO updateAppointment(UUID appointmentId, AppointmentRequestDTO appointmentRequestDTO) {
@@ -186,20 +255,6 @@ public class AppointmentService {
         DoctorDTO doctorDTO = doctorServiceClient.getDoctorById(appointment.getDoctorId());
 
         return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
-    }
-
-    public List<AppointmentResponseDTO> getAppointments() {
-        List<Appointment> appointments = appointmentRepository.findAll();
-
-        // Map each Appointment to AppointmentResponseDTO
-        return appointments.stream()
-                .map(appointment -> {
-                    SlotDTO slotDTO = slotServiceClient.getSlotById(appointment.getSlotId());
-                    PatientDTO patientDTO = patientServiceClient.getPatientById(appointment.getPatientId());
-                    DoctorDTO doctorDTO = doctorServiceClient.getDoctorById(appointment.getDoctorId());
-                    return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
-                })
-                .toList();
     }
 
     @Transactional

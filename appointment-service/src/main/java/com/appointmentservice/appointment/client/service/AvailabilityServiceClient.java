@@ -30,9 +30,9 @@ public class AvailabilityServiceClient {
                 .block();
     }
 
-    public String updateAvailabilityStatus(AvailabilityDTO availabilityDTO) {
-        return webClient.put()
-                .uri("/availabilities/{id}", availabilityDTO.getAvailabilityId())
+    public String updateAvailabilityStatus(AvailabilityDTO availabilityDTO, UUID availabilityId) {
+        return webClient.patch()
+                .uri("/availabilities/{id}", availabilityId)
                 .bodyValue(availabilityDTO)
                 .retrieve()
                 .bodyToMono(String.class)

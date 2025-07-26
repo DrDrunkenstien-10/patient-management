@@ -1,11 +1,12 @@
-package com.appointmentservice.appointment.client.dto;
+package com.scheduleservice.availability.dto;
 
-public class AvailabilityDTO {
+public class AvailabilityPatchDTO {
+
     private Boolean availability;
 
     private String unavailabilityReason;
 
-    // Getters and setters
+    // Getters and Setters
     public Boolean getAvailability() {
         return availability;
     }

@@ -1,5 +1,6 @@
 package com.appointmentservice.appointment.exception;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -62,7 +63,7 @@ public class AppointmentExceptionHandler {
                 .status(HttpStatus.CONFLICT) // 409 Conflict
                 .body(ex.getMessage());
     }
-    
+
     @ExceptionHandler(AppointmentExistsException.class)
     public ResponseEntity<Map<String, String>> handleAppointExistsException(AppointmentExistsException ex) {
         log.warn("appointment for id exists");
@@ -79,5 +80,16 @@ public class AppointmentExceptionHandler {
         Map<String, String> errors = new HashMap<>();
         errors.put("message", "appointment does not exists");
         return ResponseEntity.badRequest().body(errors);
+    }
+
+    @ExceptionHandler(InvalidFilterCategoryException.class)
+    public ResponseEntity<Object> handleInvalidFilterCategory(InvalidFilterCategoryException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", LocalDateTime.now());
+        response.put("status", HttpStatus.BAD_REQUEST.value());
+        response.put("error", "Bad Request");
+        response.put("message", ex.getMessage());
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 }
