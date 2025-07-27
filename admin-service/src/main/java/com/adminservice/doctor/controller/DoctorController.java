@@ -1,5 +1,6 @@
 package com.adminservice.doctor.controller;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
@@ -43,9 +44,15 @@ public class DoctorController {
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size,
             @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy) {
-        
+
         PaginatedResponseDTO<DoctorResponseDTO> response = doctorService.getDoctors(page, size, sortBy);
         return ResponseEntity.ok().body(response);
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<DoctorResponseDTO>> getAllDoctors() {
+        List<DoctorResponseDTO> doctorResponseDTOs = doctorService.getDoctorAll();
+        return ResponseEntity.ok().body(doctorResponseDTOs);
     }
 
     @GetMapping("/filter")

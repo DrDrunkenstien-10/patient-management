@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.pm.patientservice.dto.PaginatedResponseDTO;
 import com.pm.patientservice.dto.PatientRequestDTO;
 import com.pm.patientservice.dto.PatientResponseDTO;
 import com.pm.patientservice.dto.validator.CreatePatientValidationGroup;
@@ -22,6 +23,7 @@ import com.pm.patientservice.service.PatientService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.groups.Default;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/patients")
@@ -48,10 +50,40 @@ public class PatientController {
         return ResponseEntity.ok().body(patients);
     }
 
+    @GetMapping("/filter")
+    public ResponseEntity<PaginatedResponseDTO<PatientResponseDTO>> filterDoctor(
+            @RequestParam(name = "category", defaultValue = "name", required = true) String category,
+            @RequestParam(name = "value", defaultValue = "", required = false) String value,
+            @RequestParam(name = "direction", defaultValue = "asc") String direction,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy) {
+
+        PaginatedResponseDTO<PatientResponseDTO> response = patientService.filterDoctors(category, value, direction, page,
+                size, sortBy);
+
+        return ResponseEntity.ok().body(response);
+    }
+
+    @GetMapping("/paginated")
+    @Operation(summary = "Get Patients Pagination")
+    public ResponseEntity<PaginatedResponseDTO<PatientResponseDTO>> getPatients(
+            @RequestParam(name = "currentPage", defaultValue = "0") int currentPage) {
+        PaginatedResponseDTO<PatientResponseDTO> patients = patientService.getPatients(currentPage);
+        return ResponseEntity.ok().body(patients);
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Get Patient by ID")
     public ResponseEntity<PatientResponseDTO> getPatientById(@PathVariable("id") UUID patientId) {
         PatientResponseDTO patientResponseDTO = patientService.getPatientById(patientId);
+        return ResponseEntity.ok().body(patientResponseDTO);
+    }
+
+    @GetMapping("/doctor/{id}")
+    @Operation(summary = "Get Patient by doctor ID")
+    public ResponseEntity<List<PatientResponseDTO>> getPatientByDoctorId(@PathVariable("id") UUID doctorId) {
+        List<PatientResponseDTO> patientResponseDTO = patientService.getPatientByDoctorId(doctorId);
         return ResponseEntity.ok().body(patientResponseDTO);
     }
 

@@ -56,6 +56,13 @@ public class SlotController {
         return ResponseEntity.ok().body(slots);
     }
 
+    @GetMapping("/paginated")
+    public ResponseEntity<PaginatedResponseDTO<SlotResponseDTO>> getPaginatedSlots(
+            @RequestParam(name = "currentPage", defaultValue = "0") int currentPage) {
+        PaginatedResponseDTO<SlotResponseDTO> paginatedSlots = slotService.getPaginatedSlots(currentPage);
+        return ResponseEntity.ok().body(paginatedSlots);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<SlotResponseDTO> getSlotById(@PathVariable("id") UUID slotId) {
         SlotResponseDTO slotResponseDTO = slotService.getSlotById(slotId);

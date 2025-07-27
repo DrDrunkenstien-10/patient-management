@@ -69,6 +69,12 @@ public class AppointmentController {
         return ResponseEntity.ok().body(appointmentResponseDTOs);
     }
 
+    @GetMapping("/doctor/{id}")
+    public ResponseEntity<AppointmentResponseDTO> getAppointmentByDoctorId(@PathVariable("id") UUID doctorId) {
+        AppointmentResponseDTO appointmentResponseDTO = appointmentService.getAppointmentByDoctorId(doctorId);
+        return ResponseEntity.ok().body(appointmentResponseDTO);
+    }
+    
     @PatchMapping("/{id}")
     public ResponseEntity<AppointmentResponseDTO> patchAppointment(@PathVariable("id") UUID appointmentId,
             @RequestBody AppointmentStatusUpdateDTO appointmentStatusUpdateDTO) {

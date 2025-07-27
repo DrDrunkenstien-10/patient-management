@@ -2,7 +2,7 @@ package com.pm.patientservice.dto;
 
 import java.time.LocalDate;
 
-import com.pm.patientservice.dto.validator.CreatePatientValidationGroup;
+// import com.pm.patientservice.dto.validator.CreatePatientValidationGroup;
 import com.pm.patientservice.enums.Gender;
 
 import jakarta.validation.constraints.Email;
@@ -46,7 +46,6 @@ public class PatientRequestDTO {
 
     private String emergencyContact;
 
-    @NotBlank(groups = CreatePatientValidationGroup.class, message = "Registered date is required")
     private String registeredDate;
 
     // Getters and Setters

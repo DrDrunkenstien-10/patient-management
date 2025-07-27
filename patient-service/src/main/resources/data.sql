@@ -38,33 +38,33 @@
 -- EXECUTE FUNCTION update_updated_at_column();
 
 
-INSERT INTO patient.patient (
-    full_name,
-    gender,
-    date_of_birth,
-    aadhaar_number,
-    contact_phone,
-    email,
-    address,
-    medical_history,
-    allergies,
-    medications,
-    consents,
-    emergency_contact
-)
-VALUES (
-    'John Doe',
-    'M',
-    '1990-05-15',
-    '123456789012',
-    '9876543210',
-    'john.doe@example.com',
-    '123 Main Street, City, State, ZIP',
-    'No major illnesses.',
-    'Peanuts',
-    'None',
-    'Consent for treatment granted',
-    'John Doe - 9876543211'
-);
+-- INSERT INTO patient.patient (
+--     full_name,
+--     gender,
+--     date_of_birth,
+--     aadhaar_number,
+--     contact_phone,
+--     email,
+--     address,
+--     medical_history,
+--     allergies,
+--     medications,
+--     consents,
+--     emergency_contact
+-- )
+-- VALUES (
+--     'John Doe',
+--     'M',
+--     '1990-05-15',
+--     '123456789012',
+--     '9876543210',
+--     'john.doe@example.com',
+--     '123 Main Street, City, State, ZIP',
+--     'No major illnesses.',
+--     'Peanuts',
+--     'None',
+--     'Consent for treatment granted',
+--     'John Doe - 9876543211'
+-- );
 
 

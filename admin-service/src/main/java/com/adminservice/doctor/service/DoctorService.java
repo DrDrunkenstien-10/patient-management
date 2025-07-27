@@ -58,6 +58,14 @@ public class DoctorService {
                 doctors.isFirst());
     }
 
+    public List<DoctorResponseDTO> getDoctorAll() {
+        List<Doctor> doctors = doctorRepository.findAll();
+        if (doctors.isEmpty()) {
+            throw new DoctorNotFoundException("No doctors found");
+        }
+        return doctors.stream().map(DoctorMapper::toDto).toList();
+    }
+
     public PaginatedResponseDTO<DoctorResponseDTO> filterDoctors(
             String category,
             String value,
@@ -67,7 +75,7 @@ public class DoctorService {
             String sortBy) {
 
         doctorValidator.validateFilterCategory(category);
-        
+
         Sort sort = direction.equalsIgnoreCase("desc")
                 ? Sort.by(sortBy).descending()
                 : Sort.by(sortBy).ascending();

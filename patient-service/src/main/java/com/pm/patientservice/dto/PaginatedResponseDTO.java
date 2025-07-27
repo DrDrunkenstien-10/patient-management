@@ -1,4 +1,4 @@
-package com.scheduleservice.slot.dto;
+package com.pm.patientservice.dto;
 
 import java.util.List;
 

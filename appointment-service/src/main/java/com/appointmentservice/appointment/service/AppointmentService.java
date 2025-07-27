@@ -257,6 +257,31 @@ public class AppointmentService {
         return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
     }
 
+    public List<AppointmentResponseDTO> getAppointments() {
+        List<Appointment> appointments = appointmentRepository.findAll();
+
+        // Map each Appointment to AppointmentResponseDTO
+        return appointments.stream()
+                .map(appointment -> {
+                    SlotDTO slotDTO = slotServiceClient.getSlotById(appointment.getSlotId());
+                    PatientDTO patientDTO = patientServiceClient.getPatientById(appointment.getPatientId());
+                    DoctorDTO doctorDTO = doctorServiceClient.getDoctorById(appointment.getDoctorId());
+                    return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
+                })
+                .toList();
+    }
+
+    public AppointmentResponseDTO getAppointmentByDoctorId(UUID doctorId) {
+        Appointment appointment = appointmentRepository.findTopByDoctorIdOrderByRankDesc(doctorId)
+                .orElseThrow(() -> new AppointmentNotFoundException("No appointment found for doctor with Id " + doctorId));
+
+        SlotDTO slotDTO = slotServiceClient.getSlotById(appointment.getSlotId());
+        PatientDTO patientDTO = patientServiceClient.getPatientById(appointment.getPatientId());
+        DoctorDTO doctorDTO = doctorServiceClient.getDoctorById(appointment.getDoctorId()); 
+
+        return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
+    }
+
     @Transactional
     public void deleteAppointment(UUID appointmentId) {
         if (!appointmentRepository.existsById(appointmentId)) {

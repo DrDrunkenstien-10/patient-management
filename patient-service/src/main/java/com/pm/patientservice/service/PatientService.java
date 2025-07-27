@@ -4,8 +4,16 @@ package com.pm.patientservice.service;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Sort;
 
+import com.pm.patientservice.client.dto.AppointmentDTO;
+import com.pm.patientservice.client.service.AppointmentServiceClient;
+import com.pm.patientservice.dto.PaginatedResponseDTO;
 import com.pm.patientservice.dto.PatientRequestDTO;
 import com.pm.patientservice.dto.PatientResponseDTO;
 import com.pm.patientservice.exception.PatientNotFoundException;
@@ -14,12 +22,14 @@ import com.pm.patientservice.exception.PatientNotFoundException;
 import com.pm.patientservice.mapper.PatientMapper;
 import com.pm.patientservice.model.Patient;
 import com.pm.patientservice.repository.PatientRepository;
+import com.pm.patientservice.specification.PatientSpecification;
 import com.pm.patientservice.validator.PatientValidator;
 
 @Service
 public class PatientService {
     private PatientRepository patientRepository;
     private PatientValidator patientValidator;
+    private AppointmentServiceClient appointmentServiceClient;
     // private BillingServiceGrpcClient billingServiceGrpcClient;
     // private KafkaProducer kafkaProducer;
 
@@ -32,9 +42,11 @@ public class PatientService {
     // }
 
     public PatientService(PatientRepository patientRepository,
-            PatientValidator patientValidator) {
+            PatientValidator patientValidator,
+            AppointmentServiceClient appointmentServiceClient) {
         this.patientRepository = patientRepository;
         this.patientValidator = patientValidator;
+        this.appointmentServiceClient = appointmentServiceClient;
     }
 
     public PatientResponseDTO createPatient(PatientRequestDTO patientRequestDTO) {
@@ -58,6 +70,75 @@ public class PatientService {
                 .toList();
 
         return patientResponseDTOs;
+    }
+
+    public PaginatedResponseDTO<PatientResponseDTO> filterDoctors(
+            String category,
+            String value,
+            String direction,
+            int page,
+            int size,
+            String sortBy) {
+
+        patientValidator.validateFilterCategory(category);
+        
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Specification<Patient> spec = PatientSpecification.getPatientSpecification(category, value);
+
+        Page<Patient> patients = patientRepository.findAll(spec, pageable);
+
+        List<PatientResponseDTO> patientResponseDTOs = patients.stream().map(patient -> PatientMapper.toDTO(patient))
+                .toList();
+
+        return new PaginatedResponseDTO<>(
+                patientResponseDTOs,
+                patients.getNumber(),
+                patients.getSize(),
+                patients.getTotalElements(),
+                patients.getTotalPages(),
+                patients.isLast(),
+                patients.isFirst());
+    }
+
+    public PaginatedResponseDTO<PatientResponseDTO> getPatients(int currentPage) {
+        Pageable pageable = PageRequest.of(currentPage, 10);
+        Page<Patient> patients = patientRepository.findAll(pageable);
+
+        List<PatientResponseDTO> patientResponseDTOs = patients.stream().map(patient -> PatientMapper.toDTO(patient))
+                .toList();
+
+        return new PaginatedResponseDTO<>(
+                patientResponseDTOs,
+                patients.getNumber(),
+                patients.getSize(),
+                patients.getTotalElements(),
+                patients.getTotalPages(),
+                patients.isLast(),
+                patients.isFirst());
+    }
+
+    public List<PatientResponseDTO> getPatientByDoctorId(UUID doctorId) {
+        List<AppointmentDTO> appointments = appointmentServiceClient.getAppointmentsByDoctorId(doctorId);
+        if (appointments.isEmpty()) {
+            throw new PatientNotFoundException("No appointments found for doctor with ID: " + doctorId);
+        }
+        List<UUID> patientIds = appointments.stream()
+                .map(AppointmentDTO::getPatientId)
+                .distinct()
+                .toList();
+
+        List<Patient> patients = patientRepository.findAllById(patientIds);
+        if (patients.isEmpty()) {
+            throw new PatientNotFoundException("No patients found for doctor with ID: " + doctorId);
+        }
+        return patients.stream()
+                .map(PatientMapper::toDTO)
+                .toList();
     }
 
     public PatientResponseDTO getPatientById(UUID patientId) {

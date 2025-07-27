@@ -2,6 +2,7 @@ package com.scheduleservice.slot.service;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.scheduleservice.availability.service.AvailabilitiyService;
 import com.scheduleservice.slot.dto.PaginatedResponseDTO;
 import com.scheduleservice.slot.dto.SlotRequestDTO;
 import com.scheduleservice.slot.dto.SlotResponseDTO;
@@ -68,6 +70,24 @@ public class SlotService {
                 slots.isFirst());
     }
 
+
+    public SlotResponseDTO getSlotById(UUID slotId) {
+        Slot slot = slotRepository.findById(slotId)
+                .orElseThrow(() -> new SlotNotFoundException(
+                        "Slot not found with ID: " + slotId));
+        return SlotMapper.toDto(slot);
+    }
+
+    public PaginatedResponseDTO<SlotResponseDTO> getPaginatedSlots(int currentPage) {
+        Page<Slot> slotPage = slotRepository.findAll(PageRequest.of(currentPage, 10));
+        List<SlotResponseDTO> slotResponseDTOs = slotPage.getContent().stream()
+                .map(SlotMapper::toDto)
+                .collect(Collectors.toList());
+
+        return new PaginatedResponseDTO<>(slotResponseDTOs, slotPage.getNumber(), slotPage.getSize(),
+                slotPage.getTotalElements(), slotPage.getTotalPages(), slotPage.isLast(), slotPage.isFirst());
+    }
+
     public PaginatedResponseDTO<SlotResponseDTO> filterSlots(
             String category,
             String value,
@@ -86,26 +106,20 @@ public class SlotService {
 
         Specification<Slot> spec = SlotSpecification.getSlotSpecification(category, value);
 
-        Page<Slot> slots = slotRepository.findAll(spec, pageable);
+        Page<Slot> slotPage = slotRepository.findAll(spec, pageable);
 
-        List<SlotResponseDTO> slotResponseDTOs = slots.stream().map(slot -> SlotMapper.toDto(slot))
+        List<SlotResponseDTO> slotResponseDTOs = slotPage.stream()
+                .map(SlotMapper::toDto)
                 .toList();
 
         return new PaginatedResponseDTO<>(
                 slotResponseDTOs,
-                slots.getNumber(),
-                slots.getSize(),
-                slots.getTotalElements(),
-                slots.getTotalPages(),
-                slots.isLast(),
-                slots.isFirst());
-    }
-
-    public SlotResponseDTO getSlotById(UUID slotId) {
-        Slot slot = slotRepository.findById(slotId)
-                .orElseThrow(() -> new SlotNotFoundException(
-                        "Slot not found with ID: " + slotId));
-        return SlotMapper.toDto(slot);
+                slotPage.getNumber(),
+                slotPage.getSize(),
+                slotPage.getTotalElements(),
+                slotPage.getTotalPages(),
+                slotPage.isLast(),
+                slotPage.isFirst());
     }
 
     public SlotResponseDTO updateSlot(UUID slotId, SlotRequestDTO slotRequestDTO) {

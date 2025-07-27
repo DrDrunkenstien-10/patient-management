@@ -1,17 +1,24 @@
-{"properties": [
-  {
-    "name": "slot.service.url",
-    "type": "java.lang.String",
-    "description": "A description for 'slot.service.url'"
-  },
-  {
-    "name": "patient.service.url",
-    "type": "java.lang.String",
-    "description": "A description for 'patient.service.url'"
-  },
-  {
-    "name": "admin.server.url",
-    "type": "java.lang.String",
-    "description": "A description for 'admin.server.url'"
-  }
-]}
+{
+  "properties": [
+    {
+      "name": "slot.service.url",
+      "type": "java.lang.String",
+      "description": "A description for 'slot.service.url'"
+    },
+    {
+      "name": "patient.service.url",
+      "type": "java.lang.String",
+      "description": "A description for 'patient.service.url'"
+    },
+    {
+      "name": "admin.server.url",
+      "type": "java.lang.String",
+      "description": "A description for 'admin.server.url'"
+    },
+    {
+      "name": "availability.service.url",
+      "type": "java.lang.String",
+      "description": "A description for 'availability.service.url'"
+    }
+  ]
+}
