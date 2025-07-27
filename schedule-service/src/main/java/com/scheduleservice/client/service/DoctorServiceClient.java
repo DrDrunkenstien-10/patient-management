@@ -11,7 +11,7 @@ public class DoctorServiceClient {
 
     private final WebClient webClient;
 
-    public DoctorServiceClient(@Qualifier("doctorServiceClient") WebClient webClient) {
+    public DoctorServiceClient(@Qualifier("doctorWebClient") WebClient webClient) {
         this.webClient = webClient;
     }
 
