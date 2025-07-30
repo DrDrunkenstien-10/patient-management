@@ -49,3 +49,11 @@ public class AuthController {
                 : ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 }
+// Screen 1: User metadata (name, etc). 
+
+// Screen 2: + login data (id, username, password, role)
+
+// Refresh
+// Logout
+// Register 
+
