@@ -24,5 +24,7 @@ public class PasswordHasher {
 
         // Print it
         System.out.println("BCrypt Hashed Password: " + hashedPassword);
+
+        scanner.close();
     }
 }

@@ -6,6 +6,20 @@ CREATE TABLE IF NOT EXISTS "users" (
     role VARCHAR(50) NOT NULL
 );
 
+-- New Refresh Tokens Table
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+    id UUID PRIMARY KEY,
+    token TEXT NOT NULL UNIQUE,
+    user_id UUID NOT NULL,
+    expiry TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_user
+        FOREIGN KEY(user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE
+);
+
 -- Insert the user if no existing user with the same id or email exists
 INSERT INTO "users" (id, email, password, role)
 SELECT '223e4567-e89b-12d3-a456-426614174006', 'testuser@test.com',
