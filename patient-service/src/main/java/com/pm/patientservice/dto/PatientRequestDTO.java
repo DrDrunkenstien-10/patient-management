@@ -48,6 +48,8 @@ public class PatientRequestDTO {
 
     private String registeredDate;
 
+    private String password;
+
     // Getters and Setters
     public String getName() {
         return name;
@@ -152,4 +154,13 @@ public class PatientRequestDTO {
     public void setRegisteredDate(String registeredDate) {
         this.registeredDate = registeredDate;
     }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
 }

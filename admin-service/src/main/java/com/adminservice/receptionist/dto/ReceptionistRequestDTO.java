@@ -50,6 +50,8 @@ public class ReceptionistRequestDTO {
     @NotNull(message = "Status is required")
     private ReceptionistStatus status;
 
+    private String password;
+
     // Getters and setters
     public UUID getReceptionistId() {
         return receptionistId;
@@ -153,6 +155,14 @@ public class ReceptionistRequestDTO {
 
     public void setStatus(ReceptionistStatus status) {
         this.status = status;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
 }

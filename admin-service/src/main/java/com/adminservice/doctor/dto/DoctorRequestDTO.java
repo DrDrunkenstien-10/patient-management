@@ -49,6 +49,8 @@ public class DoctorRequestDTO {
 
     private String roleCode;
 
+    private String password;
+
 
     // Getters and Setters
 
@@ -148,4 +150,14 @@ public class DoctorRequestDTO {
         this.roleCode = roleCode;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+
+    
 }

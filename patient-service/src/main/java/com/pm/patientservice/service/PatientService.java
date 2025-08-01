@@ -9,10 +9,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Sort;
 
 import com.pm.patientservice.client.dto.AppointmentDTO;
+import com.pm.patientservice.client.dto.UserRequestDTO;
 import com.pm.patientservice.client.service.AppointmentServiceClient;
+import com.pm.patientservice.client.service.UserServiceClient;
 import com.pm.patientservice.dto.PaginatedResponseDTO;
 import com.pm.patientservice.dto.PatientRequestDTO;
 import com.pm.patientservice.dto.PatientResponseDTO;
@@ -30,6 +33,7 @@ public class PatientService {
     private PatientRepository patientRepository;
     private PatientValidator patientValidator;
     private AppointmentServiceClient appointmentServiceClient;
+    private UserServiceClient userServiceClient;
     // private BillingServiceGrpcClient billingServiceGrpcClient;
     // private KafkaProducer kafkaProducer;
 
@@ -43,24 +47,33 @@ public class PatientService {
 
     public PatientService(PatientRepository patientRepository,
             PatientValidator patientValidator,
-            AppointmentServiceClient appointmentServiceClient) {
+            AppointmentServiceClient appointmentServiceClient,
+            UserServiceClient userServiceClient) {
         this.patientRepository = patientRepository;
         this.patientValidator = patientValidator;
         this.appointmentServiceClient = appointmentServiceClient;
+        this.userServiceClient = userServiceClient;
     }
 
+    @Transactional
     public PatientResponseDTO createPatient(PatientRequestDTO patientRequestDTO) {
-        patientValidator.validateForCreation(patientRequestDTO);
+        try {
+            patientValidator.validateForCreation(patientRequestDTO);
 
-        Patient newPatient = patientRepository.save(
-                PatientMapper.toModel(patientRequestDTO));
+            Patient newPatient = patientRepository.save(
+                    PatientMapper.toModel(patientRequestDTO));
 
-        // billingServiceGrpcClient.createBillingAccount(newPatient.getPatientId().toString(),
-        // newPatient.getName(), newPatient.getEmail());
+            // billingServiceGrpcClient.createBillingAccount(newPatient.getPatientId().toString(),
+            // newPatient.getName(), newPatient.getEmail());
 
-        // kafkaProducer.sendEvent(newPatient);
+            // kafkaProducer.sendEvent(newPatient);
+            userServiceClient.createUser(
+                    new UserRequestDTO(patientRequestDTO.getEmail(), patientRequestDTO.getPassword(), "PATIENT"));
 
-        return PatientMapper.toDTO(newPatient);
+            return PatientMapper.toDTO(newPatient);
+        } catch (Exception e) {
+            throw new RuntimeException("Error creating patient: " + e.getMessage(), e);
+        }
     }
 
     public List<PatientResponseDTO> getPatients() {
@@ -81,7 +94,7 @@ public class PatientService {
             String sortBy) {
 
         patientValidator.validateFilterCategory(category);
-        
+
         Sort sort = direction.equalsIgnoreCase("desc")
                 ? Sort.by(sortBy).descending()
                 : Sort.by(sortBy).ascending();

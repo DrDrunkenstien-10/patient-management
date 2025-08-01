@@ -1,11 +1,6 @@
 {
     "properties": [
         {
-            "name": "appointment.server.url",
-            "type": "java.lang.String",
-            "description": "A description for 'appointment.server.url'"
-        },
-        {
             "name": "user.server.url",
             "type": "java.lang.String",
             "description": "A description for 'user.server.url'"

@@ -23,6 +23,10 @@ public class SystemAdminRequestDTO {
 
     private OffsetDateTime lastLogin;
 
+    private String contactEmail;
+
+    private String password;
+
     public UUID getSystemAdminId() {
         return systemAdminId;
     }
@@ -62,5 +66,23 @@ public class SystemAdminRequestDTO {
     public void setLastLogin(OffsetDateTime lastLogin) {
         this.lastLogin = lastLogin;
     }
+
+    public String getContactEmail() {
+        return contactEmail;
+    }
+
+    public void setContactEmail(String contactEmail) {
+        this.contactEmail = contactEmail;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    
 
 }

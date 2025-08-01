@@ -7,10 +7,12 @@ import java.util.Scanner;
 
 public class PasswordHasher {
 
-    public static void main(String[] args) {
-        // Create an instance of Spring's BCrypt password encoder
+    public static String hashPassword(String rawPassword) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        return passwordEncoder.encode(rawPassword);
+    }
 
+    public static void main(String[] args) {
         // Option 1: Hardcoded password
         // String rawPassword = "test123";
 
@@ -20,7 +22,7 @@ public class PasswordHasher {
         String rawPassword = scanner.nextLine();
 
         // Generate the hash
-        String hashedPassword = passwordEncoder.encode(rawPassword);
+        String hashedPassword = PasswordHasher.hashPassword(rawPassword);
 
         // Print it
         System.out.println("BCrypt Hashed Password: " + hashedPassword);

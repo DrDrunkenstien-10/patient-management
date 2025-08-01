@@ -11,6 +11,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.adminservice.client.dto.UserRequestDTO;
+import com.adminservice.client.service.UserServiceClient;
 import com.adminservice.doctor.dto.DoctorRequestDTO;
 import com.adminservice.doctor.dto.DoctorResponseDTO;
 import com.adminservice.doctor.dto.PaginatedResponseDTO;
@@ -26,18 +28,28 @@ public class DoctorService {
 
     private DoctorRepository doctorRepository;
     private DoctorValidator doctorValidator;
+    private UserServiceClient userServiceClient;
 
-    public DoctorService(DoctorRepository doctorRepository, DoctorValidator doctorValidator) {
+    public DoctorService(DoctorRepository doctorRepository, DoctorValidator doctorValidator,
+            UserServiceClient userServiceClient) {
         this.doctorRepository = doctorRepository;
         this.doctorValidator = doctorValidator;
+        this.userServiceClient = userServiceClient;
     }
 
+    @Transactional
     public DoctorResponseDTO createDoctor(DoctorRequestDTO doctorRequestDTO) {
-        doctorValidator.validateForCreation(doctorRequestDTO);
+        try {
+            doctorValidator.validateForCreation(doctorRequestDTO);
 
-        Doctor newDoctor = doctorRepository.save(DoctorMapper.toModel(doctorRequestDTO));
+            Doctor newDoctor = doctorRepository.save(DoctorMapper.toModel(doctorRequestDTO));
+            userServiceClient.createUser(
+                    new UserRequestDTO(doctorRequestDTO.getContactEmail(), doctorRequestDTO.getPassword(), "DOCTOR"));
 
-        return DoctorMapper.toDto(newDoctor);
+            return DoctorMapper.toDto(newDoctor);
+        } catch (Exception e) {
+            throw new RuntimeException("Error creating doctor: " + e.getMessage(), e);
+        }
     }
 
     public PaginatedResponseDTO<DoctorResponseDTO> getDoctors(int page, int size, String sortBy) {

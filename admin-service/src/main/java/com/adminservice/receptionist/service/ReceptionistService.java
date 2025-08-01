@@ -10,7 +10,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-
+import com.adminservice.client.dto.UserRequestDTO;
+import com.adminservice.client.service.UserServiceClient;
 import com.adminservice.receptionist.dto.PaginatedResponseDTO;
 import com.adminservice.receptionist.dto.ReceptionistRequestDTO;
 import com.adminservice.receptionist.dto.ReceptionistResponseDTO;
@@ -27,36 +28,51 @@ import jakarta.transaction.Transactional;
 public class ReceptionistService {
     private final ReceptionistRepository receptionistRepository;
     private final ReceptionistValidator receptionistValidator;
+    private final UserServiceClient userServiceClient;
 
     public ReceptionistService(ReceptionistRepository receptionistRepository,
-            ReceptionistValidator receptionistValidator) {
+            ReceptionistValidator receptionistValidator, UserServiceClient userServiceClient) {
         this.receptionistRepository = receptionistRepository;
         this.receptionistValidator = receptionistValidator;
+        this.userServiceClient = userServiceClient;
     }
 
+    @Transactional
     public ReceptionistResponseDTO createReceptionists(ReceptionistRequestDTO receptionistRequestDTO) {
-        receptionistValidator.validateForCreation(receptionistRequestDTO);
 
-        Receptionist newReceptionist = receptionistRepository.save(ReceptionistMapper.toModel(receptionistRequestDTO));
+        try {
+            receptionistValidator.validateForCreation(receptionistRequestDTO);
 
-        return ReceptionistMapper.toDto(newReceptionist);
+            Receptionist newReceptionist = receptionistRepository
+                    .save(ReceptionistMapper.toModel(receptionistRequestDTO));
+            userServiceClient.createUser(
+                    new UserRequestDTO(receptionistRequestDTO.getContactEmail(),
+                            receptionistRequestDTO.getPassword(), "RECEPTIONIST"));
+
+            return ReceptionistMapper.toDto(newReceptionist);
+        } catch (Exception e) {
+            throw new RuntimeException("Error creating receptionist: " + e.getMessage(), e);
+        }
+
     }
 
     // public List<ReceptionistResponseDTO> getReceptionists() {
-    //     List<Receptionist> receptionists = receptionistRepository.findAll();
+    // List<Receptionist> receptionists = receptionistRepository.findAll();
 
-    //     List<ReceptionistResponseDTO> receptionistResponseDTOs = receptionists.stream()
-    //             .map(receptionist -> ReceptionistMapper.toDto(receptionist)).toList();
+    // List<ReceptionistResponseDTO> receptionistResponseDTOs =
+    // receptionists.stream()
+    // .map(receptionist -> ReceptionistMapper.toDto(receptionist)).toList();
 
-    //     return receptionistResponseDTOs;
+    // return receptionistResponseDTOs;
     // }
 
-      public PaginatedResponseDTO<ReceptionistResponseDTO> getReceptionists(int page, int size, String sortBy) {
+    public PaginatedResponseDTO<ReceptionistResponseDTO> getReceptionists(int page, int size, String sortBy) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
 
         Page<Receptionist> receptionists = receptionistRepository.findAll(pageable);
 
-        List<ReceptionistResponseDTO> receptionistResponseDTOs = receptionists.stream().map(receptionist -> ReceptionistMapper.toDto(receptionist))
+        List<ReceptionistResponseDTO> receptionistResponseDTOs = receptionists.stream()
+                .map(receptionist -> ReceptionistMapper.toDto(receptionist))
                 .toList();
 
         return new PaginatedResponseDTO<>(
@@ -69,7 +85,7 @@ public class ReceptionistService {
                 receptionists.isFirst());
     }
 
-     public PaginatedResponseDTO<ReceptionistResponseDTO> filterReceptionists(
+    public PaginatedResponseDTO<ReceptionistResponseDTO> filterReceptionists(
             String category,
             String value,
             String direction,
@@ -82,11 +98,13 @@ public class ReceptionistService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Specification<Receptionist> spec = ReceptionistSpecification.getReceptionistSpecification(category, value);
+        Specification<Receptionist> spec = ReceptionistSpecification.getReceptionistSpecification(category,
+                value);
 
         Page<Receptionist> receptionists = receptionistRepository.findAll(spec, pageable);
 
-        List<ReceptionistResponseDTO> receptionistResponseDTOs = receptionists.stream().map(receptionist -> ReceptionistMapper.toDto(receptionist))
+        List<ReceptionistResponseDTO> receptionistResponseDTOs = receptionists.stream()
+                .map(receptionist -> ReceptionistMapper.toDto(receptionist))
                 .toList();
 
         return new PaginatedResponseDTO<>(
@@ -111,7 +129,8 @@ public class ReceptionistService {
             ReceptionistRequestDTO receptionistRequestDTO) {
         Receptionist receptionist = receptionistRepository.findById(receptionistId)
                 .orElseThrow(() -> new ReceptionistNotFoundException(
-                        "Receptionist not found with ID: " + receptionistRequestDTO.getReceptionistId()));
+                        "Receptionist not found with ID: "
+                                + receptionistRequestDTO.getReceptionistId()));
 
         receptionistValidator.validateForUpdate(receptionistRequestDTO, receptionistId);
 
