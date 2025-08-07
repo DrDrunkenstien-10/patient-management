@@ -1,21 +1,34 @@
 server:
   port: 4004
 
+auth:
+  service:
+    url: http://auth-service:4005  # Used in JwtValidation filter
+
 spring:
   cloud:
     gateway:
       routes:
+        # ─── AUTH SERVICE ──────────────────────────────────────
         - id: auth-service-route
           uri: http://auth-service:4005
           predicates:
-            - Path=/auth/**
+            - Path=/api/v1/auth/**, /api/v1/users/**
           filters:
-              - StripPrefix=1
+            - StripPrefix=1
 
+        - id: api-docs-auth-route
+          uri: http://auth-service:4005
+          predicates:
+            - Path=/api-docs/auth
+          filters:
+            - RewritePath=/api-docs/auth,/v3/api-docs
+
+        # ─── PATIENT SERVICE ───────────────────────────────────
         - id: patient-service-route
           uri: http://patient-service:4000
           predicates:
-            - Path=/api/patients/**
+            - Path=/patients/**
           filters:
             - StripPrefix=1
             - JwtValidation
@@ -26,11 +39,51 @@ spring:
             - Path=/api-docs/patients
           filters:
             - RewritePath=/api-docs/patients,/v3/api-docs
-        
-        - id: api-docs-auth-route
-          uri: http://auth-service:4005
+
+        # ─── ADMIN SERVICE ─────────────────────────────────────
+        - id: admin-service-route
+          uri: http://admin-service:4006
           predicates:
-            - Path=/api-docs/auth
+            - Path=/system-admins/**, /receptionists/**, /doctors/**
           filters:
-            - RewritePath=/api-docs/auth,/v3/api-docs
-          
+            - StripPrefix=1
+            - JwtValidation
+
+        - id: api-docs-admin-route
+          uri: http://admin-service:4006
+          predicates:
+            - Path=/api-docs/admin
+          filters:
+            - RewritePath=/api-docs/admin,/v3/api-docs
+
+        # ─── APPOINTMENT SERVICE ───────────────────────────────
+        - id: appointment-service-route
+          uri: http://appointment-service:4007
+          predicates:
+            - Path=/appointments/**
+          filters:
+            - StripPrefix=1
+            - JwtValidation
+
+        - id: api-docs-appointment-route
+          uri: http://appointment-service:4007
+          predicates:
+            - Path=/api-docs/appointments
+          filters:
+            - RewritePath=/api-docs/appointments,/v3/api-docs
+
+        # ─── SCHEDULE SERVICE ──────────────────────────────────
+        - id: schedule-service-route
+          uri: http://schedule-service:4008
+          predicates:
+            - Path=/availabilities/**, /schedules/**, /slots/**
+          filters:
+            - StripPrefix=1
+            - JwtValidation
+
+        - id: api-docs-schedule-route
+          uri: http://schedule-service:4008
+          predicates:
+            - Path=/api-docs/schedules
+          filters:
+            - RewritePath=/api-docs/schedules,/v3/api-docs
