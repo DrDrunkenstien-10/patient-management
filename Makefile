@@ -1,5 +1,5 @@
 # List your service directories here
-SERVICES = admin-service auth-service appointment-service
+SERVICES = admin-service auth-service appointment-service patient-service schedule-service
 
 .PHONY: run-all
 

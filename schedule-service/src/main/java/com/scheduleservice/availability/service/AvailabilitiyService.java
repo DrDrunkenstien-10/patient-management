@@ -123,6 +123,13 @@ public class AvailabilitiyService {
                                 "Availibility ID not found."));
     }
 
+    public List<AvailabilityResponseDTO> getAvailabilitiesByDoctorId(UUID doctorId) {
+        List<Availability> availabilities = availabiltyRepository.findByDocId(doctorId);
+        return availabilities.stream()
+                .map(AvailabilityMapper::toDto)
+                .toList();
+    }
+
     public AvailabilityResponseDTO updateAvailability(UUID availabilityId,
             AvailabilityPatchDTO patchDTO) {
         Availability availability = availabiltyRepository.findById(availabilityId)

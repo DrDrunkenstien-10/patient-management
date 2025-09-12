@@ -1,15 +1,21 @@
 package com.appointmentservice.appointment.validator;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Set;
+import java.time.Duration;
 
 import org.springframework.stereotype.Component;
 
+import com.appointmentservice.appointment.client.dto.SlotDTO;
 import com.appointmentservice.appointment.client.service.DoctorServiceClient;
 import com.appointmentservice.appointment.client.service.PatientServiceClient;
 import com.appointmentservice.appointment.client.service.SlotServiceClient;
 import com.appointmentservice.appointment.dto.AppointmentRequestDTO;
 import com.appointmentservice.appointment.exception.AppointmentExistsException;
 import com.appointmentservice.appointment.exception.DoctorNotFoundException;
+import com.appointmentservice.appointment.exception.InvalidAppointmentTimeException;
 import com.appointmentservice.appointment.exception.InvalidFilterCategoryException;
 import com.appointmentservice.appointment.exception.PatientNotFoundException;
 import com.appointmentservice.appointment.exception.SlotNotFoundException;
@@ -49,13 +55,35 @@ public class AppointmentValidator {
         if (!slotServiceClient.isSlotExists(appointmentRequestDTO.getSlotId())) {
             throw new SlotNotFoundException("Slot not found");
         }
+
+        SlotDTO slot = slotServiceClient.getSlotById(appointmentRequestDTO.getSlotId());
+        LocalTime time = appointmentRequestDTO.getAppointmentTime().withSecond(0).withNano(0);
+
+        LocalTime slotStart = parseTime(slot.getStartTime());
+        LocalTime slotEnd = parseTime(slot.getEndTime());
+
+        if (time.isBefore(slotStart) || time.isAfter(slotEnd)) {
+            throw new InvalidAppointmentTimeException("Appointment time outside slot range");
+        }
+
+        if (Duration.between(slotStart, time).toMinutes() % slot.getSessionDuration() != 0) {
+            throw new InvalidAppointmentTimeException("Appointment time not aligned with slot duration");
+        }
+
         if (appointmentRepository.existsByDoctorIdAndPatientIdAndSlotIdAndAppointmentDate(
                 appointmentRequestDTO.getDoctorId(),
-                appointmentRequestDTO.getSlotId(),
                 appointmentRequestDTO.getPatientId(),
+                appointmentRequestDTO.getSlotId(),
                 appointmentRequestDTO.getAppointmentDate())) {
             throw new AppointmentExistsException("appointment exists for the doctor at the slot and date");
         }
+
+        if (appointmentRepository.existsByDoctorIdAndSlotIdAndAppointmentDateAndAppointmentTime(
+                appointmentRequestDTO.getDoctorId(), appointmentRequestDTO.getSlotId(),
+                appointmentRequestDTO.getAppointmentDate(), time)) {
+            throw new AppointmentExistsException("This time slot is already booked.");
+        }
+
     }
 
     public void validateFilterCategory(String category) {
@@ -63,4 +91,13 @@ public class AppointmentValidator {
             throw new InvalidFilterCategoryException("Unsupported filter category: " + category);
         }
     }
+
+    private LocalTime parseTime(String timeStr) {
+        try {
+            return LocalTime.parse(timeStr, DateTimeFormatter.ofPattern("HH:mm:ss"));
+        } catch (DateTimeParseException e) {
+            return LocalTime.parse(timeStr, DateTimeFormatter.ofPattern("HH:mm"));
+        }
+    }
+
 }

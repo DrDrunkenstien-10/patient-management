@@ -88,7 +88,7 @@ public class Appointment {
     }
 
     public void setAppointmentTime(LocalTime appointmentTime) {
-        this.appointmentTime = appointmentTime;
+        this.appointmentTime = appointmentTime.withSecond(0).withNano(0);
     }
 
     public LocalDate getAppointmentDate() {

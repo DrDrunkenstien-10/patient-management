@@ -92,4 +92,14 @@ public class AppointmentExceptionHandler {
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(InvalidAppointmentTimeException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidAppointmentTimeException(
+            InvalidAppointmentTimeException ex) {
+        log.warn("Invalid appointment time {}", ex.getMessage());
+
+        Map<String, String> errors = new HashMap<>();
+        errors.put("message", "Invalid appointment time");
+        return ResponseEntity.badRequest().body(errors);
+    }
 }

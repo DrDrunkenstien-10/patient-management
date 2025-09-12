@@ -1,5 +1,6 @@
 package com.appointmentservice.appointment.controller;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.appointmentservice.appointment.dto.AppointmentRequestDTO;
 import com.appointmentservice.appointment.dto.AppointmentResponseDTO;
 import com.appointmentservice.appointment.dto.AppointmentStatusUpdateDTO;
+import com.appointmentservice.appointment.dto.AvailableAppointmentRequestDTO;
 import com.appointmentservice.appointment.dto.PaginatedResponseDTO;
 import com.appointmentservice.appointment.service.AppointmentService;
 
@@ -101,6 +103,16 @@ public class AppointmentController {
     public ResponseEntity<AppointmentResponseDTO> getAppointmentByDoctorId(@PathVariable("id") UUID doctorId) {
         AppointmentResponseDTO appointmentResponseDTO = appointmentService.getAppointmentByDoctorId(doctorId);
         return ResponseEntity.ok().body(appointmentResponseDTO);
+    }
+
+    @PostMapping("/fetch-appointments")
+    public ResponseEntity<List<String>> getAvailableAppointment(
+            @RequestBody AvailableAppointmentRequestDTO availableAppointmentRequestDTO) {
+        List<String> availableTimings = appointmentService
+                .getAvailableAppointmentTiming(availableAppointmentRequestDTO.getDoctorId(),
+                        availableAppointmentRequestDTO.getDate(), availableAppointmentRequestDTO.getSlotId());
+
+        return ResponseEntity.ok().body(availableTimings);
     }
 
     @PatchMapping("/{id}")

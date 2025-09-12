@@ -57,6 +57,13 @@ public class AvailabilityController {
         return ResponseEntity.ok().body(availabilityResponseDTO);
     }
 
+    @GetMapping("/doctor/{doctorId}")
+    public ResponseEntity<List<AvailabilityResponseDTO>> getAvailabilitiesByDoctorId(
+            @PathVariable("doctorId") UUID doctorId) {
+        List<AvailabilityResponseDTO> availabilities = availabilitiyService.getAvailabilitiesByDoctorId(doctorId);
+        return ResponseEntity.ok().body(availabilities);
+    }
+
     @GetMapping("/availability-id")
     public ResponseEntity<UUID> getAvailabilityId(
             @RequestParam(name = "doctorId") UUID doctorId,

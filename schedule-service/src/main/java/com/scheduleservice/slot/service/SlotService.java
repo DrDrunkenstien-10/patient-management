@@ -11,7 +11,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import com.scheduleservice.availability.service.AvailabilitiyService;
 import com.scheduleservice.slot.dto.PaginatedResponseDTO;
 import com.scheduleservice.slot.dto.SlotRequestDTO;
 import com.scheduleservice.slot.dto.SlotResponseDTO;
@@ -26,128 +25,133 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class SlotService {
-    private final CapacityCalculator capacityCalculator;
-    private final SlotRepository slotRepository;
-    private final SlotValidator slotValidator;
+        private final CapacityCalculator capacityCalculator;
+        private final SlotRepository slotRepository;
+        private final SlotValidator slotValidator;
 
-    public SlotService(CapacityCalculator capacityCalculator, SlotRepository slotRepository,
-            SlotValidator slotValidator) {
-        this.capacityCalculator = capacityCalculator;
-        this.slotRepository = slotRepository;
-        this.slotValidator = slotValidator;
-    }
+        public SlotService(CapacityCalculator capacityCalculator, SlotRepository slotRepository,
+                        SlotValidator slotValidator) {
+                this.capacityCalculator = capacityCalculator;
+                this.slotRepository = slotRepository;
+                this.slotValidator = slotValidator;
+        }
 
-    public SlotResponseDTO createSlot(SlotRequestDTO slotRequestDTO) {
+        public SlotResponseDTO createSlot(SlotRequestDTO slotRequestDTO) {
 
-        slotValidator.validateForCreation(slotRequestDTO);
+                slotValidator.validateForCreation(slotRequestDTO);
 
-        int capacity = capacityCalculator.calculateCapacity(slotRequestDTO);
-        slotRequestDTO.setCapacity(capacity);
+                int capacity = capacityCalculator.calculateCapacity(slotRequestDTO);
+                slotRequestDTO.setCapacity(capacity);
 
-        Slot newSlot = slotRepository.save(SlotMapper.toModel(slotRequestDTO));
+                Slot newSlot = slotRepository.save(SlotMapper.toModel(slotRequestDTO));
 
-        SlotResponseDTO slotResponseDTO = SlotMapper.toDto(newSlot);
+                SlotResponseDTO slotResponseDTO = SlotMapper.toDto(newSlot);
 
-        return slotResponseDTO;
-    }
+                return slotResponseDTO;
+        }
 
-    public PaginatedResponseDTO<SlotResponseDTO> getSlots(int page, int size, String sortBy) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+        public PaginatedResponseDTO<SlotResponseDTO> getSlots(int page, int size, String sortBy) {
+                Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
 
-        Page<Slot> slots = slotRepository.findAll(pageable);
+                Page<Slot> slots = slotRepository.findAll(pageable);
 
-        List<SlotResponseDTO> slotResponseDTOs = slots.stream()
-                .map(slot -> SlotMapper.toDto(slot))
-                .toList();
+                List<SlotResponseDTO> slotResponseDTOs = slots.stream()
+                                .map(slot -> SlotMapper.toDto(slot))
+                                .toList();
 
-        return new PaginatedResponseDTO<>(
-                slotResponseDTOs,
-                slots.getNumber(),
-                slots.getSize(),
-                slots.getTotalElements(),
-                slots.getTotalPages(),
-                slots.isLast(),
-                slots.isFirst());
-    }
+                return new PaginatedResponseDTO<>(
+                                slotResponseDTOs,
+                                slots.getNumber(),
+                                slots.getSize(),
+                                slots.getTotalElements(),
+                                slots.getTotalPages(),
+                                slots.isLast(),
+                                slots.isFirst());
+        }
 
+        public SlotResponseDTO getSlotById(UUID slotId) {
+                Slot slot = slotRepository.findById(slotId)
+                                .orElseThrow(() -> new SlotNotFoundException(
+                                                "Slot not found with ID: " + slotId));
+                return SlotMapper.toDto(slot);
+        }
 
-    public SlotResponseDTO getSlotById(UUID slotId) {
-        Slot slot = slotRepository.findById(slotId)
-                .orElseThrow(() -> new SlotNotFoundException(
-                        "Slot not found with ID: " + slotId));
-        return SlotMapper.toDto(slot);
-    }
+        public PaginatedResponseDTO<SlotResponseDTO> getPaginatedSlots(int currentPage) {
+                Page<Slot> slotPage = slotRepository.findAll(PageRequest.of(currentPage, 10));
+                List<SlotResponseDTO> slotResponseDTOs = slotPage.getContent().stream()
+                                .map(SlotMapper::toDto)
+                                .collect(Collectors.toList());
 
-    public PaginatedResponseDTO<SlotResponseDTO> getPaginatedSlots(int currentPage) {
-        Page<Slot> slotPage = slotRepository.findAll(PageRequest.of(currentPage, 10));
-        List<SlotResponseDTO> slotResponseDTOs = slotPage.getContent().stream()
-                .map(SlotMapper::toDto)
-                .collect(Collectors.toList());
+                return new PaginatedResponseDTO<>(slotResponseDTOs, slotPage.getNumber(), slotPage.getSize(),
+                                slotPage.getTotalElements(), slotPage.getTotalPages(), slotPage.isLast(),
+                                slotPage.isFirst());
+        }
 
-        return new PaginatedResponseDTO<>(slotResponseDTOs, slotPage.getNumber(), slotPage.getSize(),
-                slotPage.getTotalElements(), slotPage.getTotalPages(), slotPage.isLast(), slotPage.isFirst());
-    }
+        public SlotResponseDTO getSlotByDoctorIdAndSlotId(UUID doctorId, UUID slotId) {
+                Slot slots = slotRepository.findByDoctorIdAndSlotId(doctorId, slotId);
+                return SlotMapper.toDto(slots);
+        }
 
-    public PaginatedResponseDTO<SlotResponseDTO> filterSlots(
-            String category,
-            String value,
-            String direction,
-            int page,
-            int size,
-            String sortBy) {
+        public PaginatedResponseDTO<SlotResponseDTO> filterSlots(
+                        String category,
+                        String value,
+                        String direction,
+                        int page,
+                        int size,
+                        String sortBy) {
 
-        slotValidator.validateFilterCategory(category);
+                slotValidator.validateFilterCategory(category);
 
-        Sort sort = direction.equalsIgnoreCase("desc")
-                ? Sort.by(sortBy).descending()
-                : Sort.by(sortBy).ascending();
+                Sort sort = direction.equalsIgnoreCase("desc")
+                                ? Sort.by(sortBy).descending()
+                                : Sort.by(sortBy).ascending();
 
-        Pageable pageable = PageRequest.of(page, size, sort);
+                Pageable pageable = PageRequest.of(page, size, sort);
 
-        Specification<Slot> spec = SlotSpecification.getSlotSpecification(category, value);
+                Specification<Slot> spec = SlotSpecification.getSlotSpecification(category, value);
 
-        Page<Slot> slotPage = slotRepository.findAll(spec, pageable);
+                Page<Slot> slotPage = slotRepository.findAll(spec, pageable);
 
-        List<SlotResponseDTO> slotResponseDTOs = slotPage.stream()
-                .map(SlotMapper::toDto)
-                .toList();
+                List<SlotResponseDTO> slotResponseDTOs = slotPage.stream()
+                                .map(SlotMapper::toDto)
+                                .toList();
 
-        return new PaginatedResponseDTO<>(
-                slotResponseDTOs,
-                slotPage.getNumber(),
-                slotPage.getSize(),
-                slotPage.getTotalElements(),
-                slotPage.getTotalPages(),
-                slotPage.isLast(),
-                slotPage.isFirst());
-    }
+                return new PaginatedResponseDTO<>(
+                                slotResponseDTOs,
+                                slotPage.getNumber(),
+                                slotPage.getSize(),
+                                slotPage.getTotalElements(),
+                                slotPage.getTotalPages(),
+                                slotPage.isLast(),
+                                slotPage.isFirst());
+        }
 
-    public SlotResponseDTO updateSlot(UUID slotId, SlotRequestDTO slotRequestDTO) {
-        Slot slot = slotRepository.findById(slotId)
-                .orElseThrow(() -> new SlotNotFoundException(
-                        "Slot not found with ID: " + slotId));
+        public SlotResponseDTO updateSlot(UUID slotId, SlotRequestDTO slotRequestDTO) {
+                Slot slot = slotRepository.findById(slotId)
+                                .orElseThrow(() -> new SlotNotFoundException(
+                                                "Slot not found with ID: " + slotId));
 
-        slot.setName(slotRequestDTO.getName());
-        slot.setStartTime(slotRequestDTO.getEndTime());
-        slot.setEndTime(slotRequestDTO.getEndTime());
-        slot.setCapacity(slotRequestDTO.getCapacity());
-        slot.setSessionDuration(slotRequestDTO.getSessionDuration());
-        slot.setDoctorId(slotRequestDTO.getDoctorId());
+                slot.setName(slotRequestDTO.getName());
+                slot.setStartTime(slotRequestDTO.getEndTime());
+                slot.setEndTime(slotRequestDTO.getEndTime());
+                slot.setCapacity(slotRequestDTO.getCapacity());
+                slot.setSessionDuration(slotRequestDTO.getSessionDuration());
+                slot.setDoctorId(slotRequestDTO.getDoctorId());
 
-        Slot updatedSlot = slotRepository.save(slot);
+                Slot updatedSlot = slotRepository.save(slot);
 
-        return SlotMapper.toDto(updatedSlot);
-    }
+                return SlotMapper.toDto(updatedSlot);
+        }
 
-    @Transactional
-    public void deleteSlot(UUID slotId) {
-        Slot slot = slotRepository.findById(slotId)
-                .orElseThrow(() -> new SlotNotFoundException(
-                        "Slot not found with ID: " + slotId));
-        slotRepository.delete(slot);
-    }
+        @Transactional
+        public void deleteSlot(UUID slotId) {
+                Slot slot = slotRepository.findById(slotId)
+                                .orElseThrow(() -> new SlotNotFoundException(
+                                                "Slot not found with ID: " + slotId));
+                slotRepository.delete(slot);
+        }
 
-    public boolean isSlotExists(UUID slotId) {
-        return slotRepository.existsById(slotId);
-    }
+        public boolean isSlotExists(UUID slotId) {
+                return slotRepository.existsById(slotId);
+        }
 }

@@ -32,4 +32,13 @@ public class SlotServiceClient {
                 .bodyToMono(Boolean.class)
                 .block();
     }
+
+    public SlotDTO getSlotsByDoctorId(UUID doctorId, UUID slotId) {
+        return webClient.get()
+                .uri("/slots/doctor/{doctorId}/{slotId}", doctorId, slotId)
+                .retrieve()
+                .bodyToMono(SlotDTO.class)
+                .block();
+    }
+
 }

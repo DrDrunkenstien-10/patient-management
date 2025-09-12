@@ -12,4 +12,6 @@ public interface SlotRepository extends JpaRepository<Slot, UUID>, JpaSpecificat
     boolean existsByDoctorIdAndName(UUID doctorId, String name);
 
     boolean existsByDoctorIdAndStartTimeAndEndTime(UUID doctorId, LocalTime startTime, LocalTime endTime);
+
+    Slot findByDoctorIdAndSlotId(UUID doctorId, UUID slotId);
 }

@@ -2,6 +2,8 @@ package com.appointmentservice.appointment.service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -66,6 +68,7 @@ public class AppointmentService {
 						appointmentRequestDTO.getSlotId(),
 						statuses);
 
+		@SuppressWarnings("unused")
 		Optional<Appointment> existingAppointmentOpt = appointmentRepository
 				.findTop1ByDoctorIdAndSlotIdOrderByRankDesc(
 						appointmentRequestDTO.getDoctorId(),
@@ -82,17 +85,31 @@ public class AppointmentService {
 			return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
 		}
 
-		Appointment appointment;
-		if (existingAppointmentOpt.isPresent()) {
-			appointment = createSubsequentAppointment(existingAppointmentOpt.get(), appointmentRequestDTO,
-					slotDTO);
-		} else {
-			appointment = createFirstAppointment(appointmentRequestDTO, slotDTO);
-		}
+		// Appointment appointment;
+		// if (existingAppointmentOpt.isPresent()) {
+		// appointment = createSubsequentAppointment(existingAppointmentOpt.get(),
+		// appointmentRequestDTO, slotDTO);
+		// } else {
+		// appointment = createFirstAppointment(appointmentRequestDTO, slotDTO);
+		// }
+
+		Appointment appointment = createAppointments(appointmentRequestDTO);
 
 		return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
 	}
 
+	private Appointment createAppointments(AppointmentRequestDTO appointmentRequestDTO) {
+		appointmentValidator.validateForCreation(appointmentRequestDTO);
+
+		appointmentRequestDTO.setAppointmentDate(appointmentRequestDTO.getAppointmentDate());
+		appointmentRequestDTO.setAppointmentTime(appointmentRequestDTO.getAppointmentTime());
+		appointmentRequestDTO.setAppointmentStatus(AppointmentStatus.NOT_VISITED);
+		appointmentRequestDTO.setRank(1);
+
+		return appointmentRepository.save(AppointmentMapper.toModel(appointmentRequestDTO));
+	}
+
+	@SuppressWarnings("unused")
 	private Appointment createFirstAppointment(AppointmentRequestDTO appointmentRequestDTO, SlotDTO slotDTO) {
 		// LocalTime startTime = LocalTime.parse("11:00:00");
 		LocalTime startTime = LocalTime.parse(slotDTO.getStartTime());
@@ -104,6 +121,7 @@ public class AppointmentService {
 		return appointmentRepository.save(AppointmentMapper.toModel(appointmentRequestDTO));
 	}
 
+	@SuppressWarnings("unused")
 	private Appointment createSubsequentAppointment(Appointment existingAppointment,
 			AppointmentRequestDTO appointmentRequestDTO, SlotDTO slotDTO) {
 
@@ -283,7 +301,7 @@ public class AppointmentService {
 				root.get("status").in(AppointmentStatus.VISITED, AppointmentStatus.CANCELLED),
 				cb.lessThanOrEqualTo(root.get("appointmentDate"), today));
 
-		// ✅ If filter params are provided, extend spec
+		// If filter params are provided, extend spec
 		if (category != null && value != null) {
 			spec = spec.and(AppointmentSpecification.getAppointmentSpecification(category, value));
 		}
@@ -378,6 +396,35 @@ public class AppointmentService {
 		DoctorDTO doctorDTO = doctorServiceClient.getDoctorById(appointment.getDoctorId());
 
 		return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
+	}
+
+	public List<String> getAvailableAppointmentTiming(UUID doctorId, LocalDate date, UUID slotId) {
+
+		SlotDTO slotDTO = slotServiceClient.getSlotsByDoctorId(doctorId, slotId);
+
+		List<String> availableTimings = generateSessionTimes(slotDTO.getStartTime(), slotDTO.getEndTime(),
+				slotDTO.getCapacity(), slotDTO.getSessionDuration());
+
+		return availableTimings;
+	}
+
+	public static List<String> generateSessionTimes(String startTime, String endTime, int capacity,
+			int sessionDurationMinutes) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+		LocalTime start = LocalTime.parse(startTime, formatter);
+		LocalTime end = LocalTime.parse(endTime, formatter);
+
+		List<String> sessionTimes = new ArrayList<>();
+		LocalTime current = start;
+		int count = 0;
+
+		while (!current.isAfter(end) && count < capacity) {
+			sessionTimes.add(current.format(formatter));
+			current = current.plusMinutes(sessionDurationMinutes);
+			count++;
+		}
+
+		return sessionTimes;
 	}
 
 	@Transactional

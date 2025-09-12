@@ -1,6 +1,7 @@
 package com.scheduleservice.availability.repository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,4 +17,6 @@ public interface AvailabiltyRepository extends JpaRepository<Availability, UUID>
             @Param("docId") UUID docId,
             @Param("slotId") UUID slotId,
             @Param("date") LocalDate date);
+
+    List<Availability> findByDocId(UUID docId);
 }
