@@ -37,256 +37,354 @@ import com.appointmentservice.appointment.validator.AppointmentValidator;
 
 @Service
 public class AppointmentService {
-    private final AppointmentRepository appointmentRepository;
-    private final SlotServiceClient slotServiceClient;
-    private final PatientServiceClient patientServiceClient;
-    private final DoctorServiceClient doctorServiceClient;
-    private final AppointmentValidator appointmentValidator;
-    private final AvailabilityServiceClient availabilityServiceClient;
+	private final AppointmentRepository appointmentRepository;
+	private final SlotServiceClient slotServiceClient;
+	private final PatientServiceClient patientServiceClient;
+	private final DoctorServiceClient doctorServiceClient;
+	private final AppointmentValidator appointmentValidator;
+	private final AvailabilityServiceClient availabilityServiceClient;
 
-    public AppointmentService(AppointmentRepository appointmentRepository, SlotServiceClient slotServiceClient,
-            PatientServiceClient patientServiceClient, DoctorServiceClient doctorServiceClient,
-            AppointmentValidator appointmentValidator,
-            AvailabilityServiceClient availabilityServiceClient) {
-        this.appointmentRepository = appointmentRepository;
-        this.slotServiceClient = slotServiceClient;
-        this.patientServiceClient = patientServiceClient;
-        this.doctorServiceClient = doctorServiceClient;
-        this.appointmentValidator = appointmentValidator;
-        this.availabilityServiceClient = availabilityServiceClient;
-    }
+	public AppointmentService(AppointmentRepository appointmentRepository, SlotServiceClient slotServiceClient,
+			PatientServiceClient patientServiceClient, DoctorServiceClient doctorServiceClient,
+			AppointmentValidator appointmentValidator,
+			AvailabilityServiceClient availabilityServiceClient) {
+		this.appointmentRepository = appointmentRepository;
+		this.slotServiceClient = slotServiceClient;
+		this.patientServiceClient = patientServiceClient;
+		this.doctorServiceClient = doctorServiceClient;
+		this.appointmentValidator = appointmentValidator;
+		this.availabilityServiceClient = availabilityServiceClient;
+	}
 
-    public AppointmentResponseDTO createAppointment(AppointmentRequestDTO appointmentRequestDTO) {
-        appointmentValidator.validateForCreation(appointmentRequestDTO);
+	public AppointmentResponseDTO createAppointment(AppointmentRequestDTO appointmentRequestDTO) {
+		appointmentValidator.validateForCreation(appointmentRequestDTO);
 
-        List<String> statuses = Arrays.asList("RESCHEDULED", "CANCELLED");
-        Optional<Appointment> existingResheduledOrCancelledAppointment = appointmentRepository
-                .findTop1ByDoctorIdAndSlotIdAndStatusInOrderByRankAsc(
-                        appointmentRequestDTO.getDoctorId(),
-                        appointmentRequestDTO.getSlotId(),
-                        statuses);
+		List<String> statuses = Arrays.asList("RESCHEDULED", "CANCELLED");
+		Optional<Appointment> existingResheduledOrCancelledAppointment = appointmentRepository
+				.findTop1ByDoctorIdAndSlotIdAndStatusInOrderByRankAsc(
+						appointmentRequestDTO.getDoctorId(),
+						appointmentRequestDTO.getSlotId(),
+						statuses);
 
-        Optional<Appointment> existingAppointmentOpt = appointmentRepository
-                .findTop1ByDoctorIdAndSlotIdOrderByRankDesc(
-                        appointmentRequestDTO.getDoctorId(),
-                        appointmentRequestDTO.getSlotId());
+		Optional<Appointment> existingAppointmentOpt = appointmentRepository
+				.findTop1ByDoctorIdAndSlotIdOrderByRankDesc(
+						appointmentRequestDTO.getDoctorId(),
+						appointmentRequestDTO.getSlotId());
 
-        SlotDTO slotDTO = slotServiceClient.getSlotById(appointmentRequestDTO.getSlotId());
-        PatientDTO patientDTO = patientServiceClient.getPatientById(appointmentRequestDTO.getPatientId());
-        DoctorDTO doctorDTO = doctorServiceClient.getDoctorById(appointmentRequestDTO.getDoctorId());
+		SlotDTO slotDTO = slotServiceClient.getSlotById(appointmentRequestDTO.getSlotId());
+		PatientDTO patientDTO = patientServiceClient.getPatientById(appointmentRequestDTO.getPatientId());
+		DoctorDTO doctorDTO = doctorServiceClient.getDoctorById(appointmentRequestDTO.getDoctorId());
 
-        if (existingResheduledOrCancelledAppointment.isPresent()) {
-            Appointment appointment = updateAppointmentIfExistingResheduledOrCancelled(appointmentRequestDTO,
-                    existingResheduledOrCancelledAppointment.get());
-            return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
-        }
+		if (existingResheduledOrCancelledAppointment.isPresent()) {
+			Appointment appointment = updateAppointmentIfExistingResheduledOrCancelled(
+					appointmentRequestDTO,
+					existingResheduledOrCancelledAppointment.get());
+			return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
+		}
 
-        Appointment appointment;
-        if (existingAppointmentOpt.isPresent()) {
-            appointment = createSubsequentAppointment(existingAppointmentOpt.get(), appointmentRequestDTO, slotDTO);
-        } else {
-            appointment = createFirstAppointment(appointmentRequestDTO, slotDTO);
-        }
+		Appointment appointment;
+		if (existingAppointmentOpt.isPresent()) {
+			appointment = createSubsequentAppointment(existingAppointmentOpt.get(), appointmentRequestDTO,
+					slotDTO);
+		} else {
+			appointment = createFirstAppointment(appointmentRequestDTO, slotDTO);
+		}
 
-        return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
-    }
+		return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
+	}
 
-    private Appointment createFirstAppointment(AppointmentRequestDTO appointmentRequestDTO, SlotDTO slotDTO) {
-        // LocalTime startTime = LocalTime.parse("11:00:00");
-        LocalTime startTime = LocalTime.parse(slotDTO.getStartTime());
+	private Appointment createFirstAppointment(AppointmentRequestDTO appointmentRequestDTO, SlotDTO slotDTO) {
+		// LocalTime startTime = LocalTime.parse("11:00:00");
+		LocalTime startTime = LocalTime.parse(slotDTO.getStartTime());
 
-        appointmentRequestDTO.setAppointmentTime(startTime);
-        appointmentRequestDTO.setAppointmentStatus(AppointmentStatus.NOT_VISITED);
-        appointmentRequestDTO.setRank(1);
+		appointmentRequestDTO.setAppointmentTime(startTime);
+		appointmentRequestDTO.setAppointmentStatus(AppointmentStatus.NOT_VISITED);
+		appointmentRequestDTO.setRank(1);
 
-        return appointmentRepository.save(AppointmentMapper.toModel(appointmentRequestDTO));
-    }
+		return appointmentRepository.save(AppointmentMapper.toModel(appointmentRequestDTO));
+	}
 
-    private Appointment createSubsequentAppointment(Appointment existingAppointment,
-            AppointmentRequestDTO appointmentRequestDTO, SlotDTO slotDTO) {
+	private Appointment createSubsequentAppointment(Appointment existingAppointment,
+			AppointmentRequestDTO appointmentRequestDTO, SlotDTO slotDTO) {
 
-        LocalTime appointmentTime = existingAppointment.getAppointmentTime();
-        int rank = existingAppointment.getRank();
+		LocalTime appointmentTime = existingAppointment.getAppointmentTime();
+		int rank = existingAppointment.getRank();
 
-        int sessionDuration = slotDTO.getSessionDuration();
-        int capacity = slotDTO.getCapacity();
+		int sessionDuration = slotDTO.getSessionDuration();
+		int capacity = slotDTO.getCapacity();
 
-        if (rank < capacity) {
+		if (rank < capacity) {
 
-            // Increment appointment time by session duration
-            appointmentTime = appointmentTime.plusMinutes(sessionDuration);
+			// Increment appointment time by session duration
+			appointmentTime = appointmentTime.plusMinutes(sessionDuration);
 
-            appointmentRequestDTO.setAppointmentTime(appointmentTime);
-            appointmentRequestDTO.setAppointmentStatus(AppointmentStatus.NOT_VISITED);
-            appointmentRequestDTO.setRank(rank + 1);
+			appointmentRequestDTO.setAppointmentTime(appointmentTime);
+			appointmentRequestDTO.setAppointmentStatus(AppointmentStatus.NOT_VISITED);
+			appointmentRequestDTO.setRank(rank + 1);
 
-            return appointmentRepository.save(AppointmentMapper.toModel(appointmentRequestDTO));
-        }
+			return appointmentRepository.save(AppointmentMapper.toModel(appointmentRequestDTO));
+		}
 
-        else {
-            UUID doctorId = existingAppointment.getDoctorId();
-            UUID slotId = existingAppointment.getSlotId();
-            LocalDate date = existingAppointment.getAppointmentDate();
-            boolean availability = false;
-            String unAvailabilityReason = "Slot full";
-            UUID availabilityId = availabilityServiceClient.getAvailabilityId(doctorId, slotId, date);
+		else {
+			UUID doctorId = existingAppointment.getDoctorId();
+			UUID slotId = existingAppointment.getSlotId();
+			LocalDate date = existingAppointment.getAppointmentDate();
+			boolean availability = false;
+			String unAvailabilityReason = "Slot full";
+			UUID availabilityId = availabilityServiceClient.getAvailabilityId(doctorId, slotId, date);
 
-            AvailabilityDTO availabilityDTO = new AvailabilityDTO();
+			AvailabilityDTO availabilityDTO = new AvailabilityDTO();
 
-            availabilityDTO.setAvailability(availability);
-            availabilityDTO.setUnavailabilityReason(unAvailabilityReason);
+			availabilityDTO.setAvailability(availability);
+			availabilityDTO.setUnavailabilityReason(unAvailabilityReason);
 
-            availabilityServiceClient.updateAvailabilityStatus(availabilityDTO, availabilityId);
+			availabilityServiceClient.updateAvailabilityStatus(availabilityDTO, availabilityId);
 
-            throw new SlotCapacityExceededException(
-                    "No available appointments: slot capacity of " + capacity + " reached for slotId "
-                            + appointmentRequestDTO.getSlotId());
-        }
-    }
+			throw new SlotCapacityExceededException(
+					"No available appointments: slot capacity of " + capacity
+							+ " reached for slotId "
+							+ appointmentRequestDTO.getSlotId());
+		}
+	}
 
-    public Appointment updateAppointmentIfExistingResheduledOrCancelled(AppointmentRequestDTO appointmentRequestDTO,
-            Appointment existingResheduledOrCancelledAppointment) {
+	public Appointment updateAppointmentIfExistingResheduledOrCancelled(AppointmentRequestDTO appointmentRequestDTO,
+			Appointment existingResheduledOrCancelledAppointment) {
 
-        existingResheduledOrCancelledAppointment.setPatientId(appointmentRequestDTO.getPatientId());
-        existingResheduledOrCancelledAppointment.setStatus(AppointmentStatus.NOT_VISITED);
+		existingResheduledOrCancelledAppointment.setPatientId(appointmentRequestDTO.getPatientId());
+		existingResheduledOrCancelledAppointment.setStatus(AppointmentStatus.NOT_VISITED);
 
-        return appointmentRepository.save(existingResheduledOrCancelledAppointment);
+		return appointmentRepository.save(existingResheduledOrCancelledAppointment);
 
-    }
+	}
 
-    public PaginatedResponseDTO<AppointmentResponseDTO> getAppointments(int page, int size,
-            String sortBy) {
+	public PaginatedResponseDTO<AppointmentResponseDTO> getAppointments(int page, int size,
+			String sortBy) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+		Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
 
-        Page<Appointment> appointments = appointmentRepository.findAll(pageable);
+		Page<Appointment> appointments = appointmentRepository.findAll(pageable);
 
-        List<AppointmentResponseDTO> appointmentResponseDTOs = appointments.stream()
-                .map(appointment -> {
-                    SlotDTO slotDTO = slotServiceClient.getSlotById(appointment.getSlotId());
-                    PatientDTO patientDTO = patientServiceClient.getPatientById(appointment.getPatientId());
-                    DoctorDTO doctorDTO = doctorServiceClient.getDoctorById(appointment.getDoctorId());
-                    return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
-                })
-                .toList();
+		List<AppointmentResponseDTO> appointmentResponseDTOs = appointments.stream()
+				.map(appointment -> {
+					SlotDTO slotDTO = slotServiceClient.getSlotById(appointment.getSlotId());
+					PatientDTO patientDTO = patientServiceClient
+							.getPatientById(appointment.getPatientId());
+					DoctorDTO doctorDTO = doctorServiceClient
+							.getDoctorById(appointment.getDoctorId());
+					return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
+				})
+				.toList();
 
-        return new PaginatedResponseDTO<>(
-                appointmentResponseDTOs,
-                appointments.getNumber(),
-                appointments.getSize(),
-                appointments.getTotalElements(),
-                appointments.getTotalPages(),
-                appointments.isLast(),
-                appointments.isFirst());
-    }
+		return new PaginatedResponseDTO<>(
+				appointmentResponseDTOs,
+				appointments.getNumber(),
+				appointments.getSize(),
+				appointments.getTotalElements(),
+				appointments.getTotalPages(),
+				appointments.isLast(),
+				appointments.isFirst());
+	}
 
-    public PaginatedResponseDTO<AppointmentResponseDTO> filterAppointments(
-            String category,
-            String value,
-            String direction,
-            int page,
-            int size,
-            String sortBy) {
+	public PaginatedResponseDTO<AppointmentResponseDTO> filterAppointments(
+			String category,
+			String value,
+			String direction,
+			int page,
+			int size,
+			String sortBy) {
 
-        appointmentValidator.validateFilterCategory(category);
+		appointmentValidator.validateFilterCategory(category);
 
-        Sort sort = direction.equalsIgnoreCase("desc")
-                ? Sort.by(sortBy).descending()
-                : Sort.by(sortBy).ascending();
+		Sort sort = direction.equalsIgnoreCase("desc")
+				? Sort.by(sortBy).descending()
+				: Sort.by(sortBy).ascending();
 
-        Pageable pageable = PageRequest.of(page, size, sort);
+		Pageable pageable = PageRequest.of(page, size, sort);
 
-        Specification<Appointment> spec = AppointmentSpecification
-                .getAppointmentSpecification(category, value);
+		Specification<Appointment> spec = AppointmentSpecification
+				.getAppointmentSpecification(category, value);
 
-        Page<Appointment> appointments = appointmentRepository.findAll(spec, pageable);
+		Page<Appointment> appointments = appointmentRepository.findAll(spec, pageable);
 
-        List<AppointmentResponseDTO> appointmentResponseDTOs = appointments.stream()
-                .map(appointment -> {
-                    SlotDTO slotDTO = slotServiceClient.getSlotById(appointment.getSlotId());
-                    PatientDTO patientDTO = patientServiceClient.getPatientById(appointment.getPatientId());
-                    DoctorDTO doctorDTO = doctorServiceClient.getDoctorById(appointment.getDoctorId());
-                    return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
-                })
-                .toList();
+		List<AppointmentResponseDTO> appointmentResponseDTOs = appointments.stream()
+				.map(appointment -> {
+					SlotDTO slotDTO = slotServiceClient.getSlotById(appointment.getSlotId());
+					PatientDTO patientDTO = patientServiceClient
+							.getPatientById(appointment.getPatientId());
+					DoctorDTO doctorDTO = doctorServiceClient
+							.getDoctorById(appointment.getDoctorId());
+					return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
+				})
+				.toList();
 
-        return new PaginatedResponseDTO<>(
-                appointmentResponseDTOs,
-                appointments.getNumber(),
-                appointments.getSize(),
-                appointments.getTotalElements(),
-                appointments.getTotalPages(),
-                appointments.isLast(),
-                appointments.isFirst());
-    }
+		return new PaginatedResponseDTO<>(
+				appointmentResponseDTOs,
+				appointments.getNumber(),
+				appointments.getSize(),
+				appointments.getTotalElements(),
+				appointments.getTotalPages(),
+				appointments.isLast(),
+				appointments.isFirst());
+	}
 
-    public AppointmentResponseDTO updateAppointment(UUID appointmentId, AppointmentRequestDTO appointmentRequestDTO) {
-        Appointment appointment = appointmentRepository.findById(appointmentId)
-                .orElseThrow(
-                        () -> new AppointmentNotFoundException("appointment with Id" + appointmentId + "not found"));
+	public PaginatedResponseDTO<AppointmentResponseDTO> getUpcomingAppointments(
+			UUID patientId,
+			int page,
+			int size,
+			String category,
+			String value) {
 
-        appointment.setAppointmentId(appointmentId);
-        appointment.setDoctorId(appointmentRequestDTO.getDoctorId());
-        appointment.setPatientId(appointmentRequestDTO.getPatientId());
-        appointment.setSlotId(appointmentRequestDTO.getSlotId());
-        appointment.setAppointmentTime(appointmentRequestDTO.getAppointmentTime());
-        appointment.setAppointmentDate(appointmentRequestDTO.getAppointmentDate());
-        appointment.setStatus(appointmentRequestDTO.getAppointmentStatus());
-        appointment.setRank(appointmentRequestDTO.getRank());
+		Pageable pageable = PageRequest.of(page, size, Sort.by("appointmentDate").ascending());
+		LocalDate today = LocalDate.now();
 
-        appointmentRepository.save(appointment);
+		Specification<Appointment> spec = (root, query, cb) -> cb.and(
+				cb.equal(root.get("patientId"), patientId),
+				root.get("status").in(AppointmentStatus.NOT_VISITED, AppointmentStatus.RESCHEDULED),
+				cb.greaterThanOrEqualTo(root.get("appointmentDate"), today));
 
-        return AppointmentMapper.toDto(appointment,
-                slotServiceClient.getSlotById(appointmentRequestDTO.getSlotId()),
-                doctorServiceClient.getDoctorById(appointmentRequestDTO.getDoctorId()),
-                patientServiceClient.getPatientById(appointmentRequestDTO.getPatientId()));
-    }
+		// ✅ If filter params are provided, extend spec
+		if (category != null && value != null) {
+			spec = spec.and(AppointmentSpecification.getAppointmentSpecification(category, value));
+		}
 
-    public AppointmentResponseDTO patchAppointmentStatus(UUID appointmentId, AppointmentStatus status) {
-        Appointment appointment = appointmentRepository.findById(appointmentId)
-                .orElseThrow(
-                        () -> new AppointmentNotFoundException("appointment with Id" + appointmentId + "not found"));
-        appointment.setAppointmentId(appointmentId);
-        appointment.setStatus(status);
-        appointmentRepository.save(appointment);
+		Page<Appointment> appointments = appointmentRepository.findAll(spec, pageable);
 
-        SlotDTO slotDTO = slotServiceClient.getSlotById(appointment.getSlotId());
-        PatientDTO patientDTO = patientServiceClient.getPatientById(appointment.getPatientId());
-        DoctorDTO doctorDTO = doctorServiceClient.getDoctorById(appointment.getDoctorId());
+		List<AppointmentResponseDTO> appointmentResponseDTOs = appointments.stream()
+				.map(appointment -> {
+					SlotDTO slotDTO = slotServiceClient.getSlotById(appointment.getSlotId());
+					PatientDTO patientDTO = patientServiceClient.getPatientById(appointment.getPatientId());
+					DoctorDTO doctorDTO = doctorServiceClient.getDoctorById(appointment.getDoctorId());
+					return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
+				})
+				.toList();
 
-        return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
-    }
+		return new PaginatedResponseDTO<>(
+				appointmentResponseDTOs,
+				appointments.getNumber(),
+				appointments.getSize(),
+				appointments.getTotalElements(),
+				appointments.getTotalPages(),
+				appointments.isLast(),
+				appointments.isFirst());
+	}
 
-    public List<AppointmentResponseDTO> getAppointments() {
-        List<Appointment> appointments = appointmentRepository.findAll();
+	public PaginatedResponseDTO<AppointmentResponseDTO> getPastAppointments(
+			UUID patientId,
+			int page,
+			int size,
+			String category,
+			String value) {
 
-        // Map each Appointment to AppointmentResponseDTO
-        return appointments.stream()
-                .map(appointment -> {
-                    SlotDTO slotDTO = slotServiceClient.getSlotById(appointment.getSlotId());
-                    PatientDTO patientDTO = patientServiceClient.getPatientById(appointment.getPatientId());
-                    DoctorDTO doctorDTO = doctorServiceClient.getDoctorById(appointment.getDoctorId());
-                    return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
-                })
-                .toList();
-    }
+		Pageable pageable = PageRequest.of(page, size, Sort.by("appointmentDate").ascending());
+		LocalDate today = LocalDate.now();
 
-    public AppointmentResponseDTO getAppointmentByDoctorId(UUID doctorId) {
-        Appointment appointment = appointmentRepository.findTopByDoctorIdOrderByRankDesc(doctorId)
-                .orElseThrow(() -> new AppointmentNotFoundException("No appointment found for doctor with Id " + doctorId));
+		Specification<Appointment> spec = (root, query, cb) -> cb.and(
+				cb.equal(root.get("patientId"), patientId),
+				root.get("status").in(AppointmentStatus.VISITED, AppointmentStatus.CANCELLED),
+				cb.lessThanOrEqualTo(root.get("appointmentDate"), today));
 
-        SlotDTO slotDTO = slotServiceClient.getSlotById(appointment.getSlotId());
-        PatientDTO patientDTO = patientServiceClient.getPatientById(appointment.getPatientId());
-        DoctorDTO doctorDTO = doctorServiceClient.getDoctorById(appointment.getDoctorId()); 
+		// ✅ If filter params are provided, extend spec
+		if (category != null && value != null) {
+			spec = spec.and(AppointmentSpecification.getAppointmentSpecification(category, value));
+		}
 
-        return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
-    }
+		Page<Appointment> appointments = appointmentRepository.findAll(spec, pageable);
 
-    @Transactional
-    public void deleteAppointment(UUID appointmentId) {
-        if (!appointmentRepository.existsById(appointmentId)) {
-            throw new AppointmentNotFoundException("appointment with Id " + appointmentId + "not found");
-        }
-        appointmentRepository.deleteById(appointmentId);
-    }
+		List<AppointmentResponseDTO> appointmentResponseDTOs = appointments.stream()
+				.map(appointment -> {
+					SlotDTO slotDTO = slotServiceClient.getSlotById(appointment.getSlotId());
+					PatientDTO patientDTO = patientServiceClient
+							.getPatientById(appointment.getPatientId());
+					DoctorDTO doctorDTO = doctorServiceClient
+							.getDoctorById(appointment.getDoctorId());
+					return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
+				})
+				.toList();
+
+		return new PaginatedResponseDTO<>(
+				appointmentResponseDTOs,
+				appointments.getNumber(),
+				appointments.getSize(),
+				appointments.getTotalElements(),
+				appointments.getTotalPages(),
+				appointments.isLast(),
+				appointments.isFirst());
+	}
+
+	public AppointmentResponseDTO updateAppointment(UUID appointmentId,
+			AppointmentRequestDTO appointmentRequestDTO) {
+		Appointment appointment = appointmentRepository.findById(appointmentId)
+				.orElseThrow(
+						() -> new AppointmentNotFoundException(
+								"appointment with Id" + appointmentId + "not found"));
+
+		appointment.setAppointmentId(appointmentId);
+		appointment.setDoctorId(appointmentRequestDTO.getDoctorId());
+		appointment.setPatientId(appointmentRequestDTO.getPatientId());
+		appointment.setSlotId(appointmentRequestDTO.getSlotId());
+		appointment.setAppointmentTime(appointmentRequestDTO.getAppointmentTime());
+		appointment.setAppointmentDate(appointmentRequestDTO.getAppointmentDate());
+		appointment.setStatus(appointmentRequestDTO.getAppointmentStatus());
+		appointment.setRank(appointmentRequestDTO.getRank());
+
+		appointmentRepository.save(appointment);
+
+		return AppointmentMapper.toDto(appointment,
+				slotServiceClient.getSlotById(appointmentRequestDTO.getSlotId()),
+				doctorServiceClient.getDoctorById(appointmentRequestDTO.getDoctorId()),
+				patientServiceClient.getPatientById(appointmentRequestDTO.getPatientId()));
+	}
+
+	public AppointmentResponseDTO patchAppointmentStatus(UUID appointmentId, AppointmentStatus status) {
+		Appointment appointment = appointmentRepository.findById(appointmentId)
+				.orElseThrow(
+						() -> new AppointmentNotFoundException(
+								"appointment with Id" + appointmentId + "not found"));
+		appointment.setAppointmentId(appointmentId);
+		appointment.setStatus(status);
+		appointmentRepository.save(appointment);
+
+		SlotDTO slotDTO = slotServiceClient.getSlotById(appointment.getSlotId());
+		PatientDTO patientDTO = patientServiceClient.getPatientById(appointment.getPatientId());
+		DoctorDTO doctorDTO = doctorServiceClient.getDoctorById(appointment.getDoctorId());
+
+		return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
+	}
+
+	public List<AppointmentResponseDTO> getAppointments() {
+		List<Appointment> appointments = appointmentRepository.findAll();
+
+		// Map each Appointment to AppointmentResponseDTO
+		return appointments.stream()
+				.map(appointment -> {
+					SlotDTO slotDTO = slotServiceClient.getSlotById(appointment.getSlotId());
+					PatientDTO patientDTO = patientServiceClient
+							.getPatientById(appointment.getPatientId());
+					DoctorDTO doctorDTO = doctorServiceClient
+							.getDoctorById(appointment.getDoctorId());
+					return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
+				})
+				.toList();
+	}
+
+	public AppointmentResponseDTO getAppointmentByDoctorId(UUID doctorId) {
+		Appointment appointment = appointmentRepository.findTopByDoctorIdOrderByRankDesc(doctorId)
+				.orElseThrow(
+						() -> new AppointmentNotFoundException(
+								"No appointment found for doctor with Id " + doctorId));
+
+		SlotDTO slotDTO = slotServiceClient.getSlotById(appointment.getSlotId());
+		PatientDTO patientDTO = patientServiceClient.getPatientById(appointment.getPatientId());
+		DoctorDTO doctorDTO = doctorServiceClient.getDoctorById(appointment.getDoctorId());
+
+		return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
+	}
+
+	@Transactional
+	public void deleteAppointment(UUID appointmentId) {
+		if (!appointmentRepository.existsById(appointmentId)) {
+			throw new AppointmentNotFoundException("appointment with Id " + appointmentId + "not found");
+		}
+		appointmentRepository.deleteById(appointmentId);
+	}
 }

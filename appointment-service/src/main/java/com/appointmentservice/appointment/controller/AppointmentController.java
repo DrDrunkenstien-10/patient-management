@@ -69,12 +69,40 @@ public class AppointmentController {
         return ResponseEntity.ok().body(appointmentResponseDTOs);
     }
 
+    @GetMapping("/upcoming/{id}")
+    public ResponseEntity<PaginatedResponseDTO<AppointmentResponseDTO>> getUpcomingAppointments(
+            @PathVariable("id") UUID patientId,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "category", required = false) String category,
+            @RequestParam(name = "value", required = false) String value) {
+
+        PaginatedResponseDTO<AppointmentResponseDTO> response = appointmentService.getUpcomingAppointments(patientId,
+                page, size, category, value);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/past/{id}")
+    public ResponseEntity<PaginatedResponseDTO<AppointmentResponseDTO>> getPastAppointments(
+            @PathVariable("id") UUID patientId,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "category", required = false) String category,
+            @RequestParam(name = "value", required = false) String value) {
+
+        PaginatedResponseDTO<AppointmentResponseDTO> response = appointmentService.getPastAppointments(patientId, page,
+                size, category, value);
+
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/doctor/{id}")
     public ResponseEntity<AppointmentResponseDTO> getAppointmentByDoctorId(@PathVariable("id") UUID doctorId) {
         AppointmentResponseDTO appointmentResponseDTO = appointmentService.getAppointmentByDoctorId(doctorId);
         return ResponseEntity.ok().body(appointmentResponseDTO);
     }
-    
+
     @PatchMapping("/{id}")
     public ResponseEntity<AppointmentResponseDTO> patchAppointment(@PathVariable("id") UUID appointmentId,
             @RequestBody AppointmentStatusUpdateDTO appointmentStatusUpdateDTO) {
