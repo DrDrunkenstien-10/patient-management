@@ -17,6 +17,7 @@ import com.appointmentservice.appointment.dto.AppointmentRequestDTO;
 import com.appointmentservice.appointment.dto.AppointmentResponseDTO;
 import com.appointmentservice.appointment.dto.AppointmentStatusUpdateDTO;
 import com.appointmentservice.appointment.dto.AvailableAppointmentRequestDTO;
+import com.appointmentservice.appointment.dto.AvailableAppointmentResponseDTO;
 import com.appointmentservice.appointment.dto.PaginatedResponseDTO;
 import com.appointmentservice.appointment.service.AppointmentService;
 
@@ -106,9 +107,9 @@ public class AppointmentController {
     }
 
     @PostMapping("/fetch-appointments")
-    public ResponseEntity<List<String>> getAvailableAppointment(
+    public ResponseEntity<List<AvailableAppointmentResponseDTO>> getAvailableAppointment(
             @RequestBody AvailableAppointmentRequestDTO availableAppointmentRequestDTO) {
-        List<String> availableTimings = appointmentService
+        List<AvailableAppointmentResponseDTO> availableTimings = appointmentService
                 .getAvailableAppointmentTiming(availableAppointmentRequestDTO.getDoctorId(),
                         availableAppointmentRequestDTO.getDate(), availableAppointmentRequestDTO.getSlotId());
 

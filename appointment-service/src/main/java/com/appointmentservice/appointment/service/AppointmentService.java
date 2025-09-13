@@ -27,6 +27,7 @@ import com.appointmentservice.appointment.client.service.PatientServiceClient;
 import com.appointmentservice.appointment.client.service.SlotServiceClient;
 import com.appointmentservice.appointment.dto.AppointmentRequestDTO;
 import com.appointmentservice.appointment.dto.AppointmentResponseDTO;
+import com.appointmentservice.appointment.dto.AvailableAppointmentResponseDTO;
 import com.appointmentservice.appointment.dto.PaginatedResponseDTO;
 import com.appointmentservice.appointment.enums.AppointmentStatus;
 import com.appointmentservice.appointment.exception.SlotCapacityExceededException;
@@ -260,7 +261,7 @@ public class AppointmentService {
 				root.get("status").in(AppointmentStatus.NOT_VISITED, AppointmentStatus.RESCHEDULED),
 				cb.greaterThanOrEqualTo(root.get("appointmentDate"), today));
 
-		// ✅ If filter params are provided, extend spec
+		// If filter params are provided, extend spec
 		if (category != null && value != null) {
 			spec = spec.and(AppointmentSpecification.getAppointmentSpecification(category, value));
 		}
@@ -398,28 +399,39 @@ public class AppointmentService {
 		return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
 	}
 
-	public List<String> getAvailableAppointmentTiming(UUID doctorId, LocalDate date, UUID slotId) {
+	public List<AvailableAppointmentResponseDTO> getAvailableAppointmentTiming(UUID doctorId, LocalDate date,
+			UUID slotId) {
 
 		SlotDTO slotDTO = slotServiceClient.getSlotsByDoctorId(doctorId, slotId);
 
-		List<String> availableTimings = generateSessionTimes(slotDTO.getStartTime(), slotDTO.getEndTime(),
-				slotDTO.getCapacity(), slotDTO.getSessionDuration());
+		List<AvailableAppointmentResponseDTO> availableTimings = generateSessionTimes(slotDTO.getStartTime(),
+				slotDTO.getEndTime(),
+				slotDTO.getCapacity(), slotDTO.getSessionDuration(), slotId, doctorId, date);
 
 		return availableTimings;
 	}
 
-	public static List<String> generateSessionTimes(String startTime, String endTime, int capacity,
-			int sessionDurationMinutes) {
+	public List<AvailableAppointmentResponseDTO> generateSessionTimes(String startTime, String endTime,
+			int capacity,
+			int sessionDurationMinutes,
+			UUID slotId,
+			UUID doctorId,
+			LocalDate date) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
 		LocalTime start = LocalTime.parse(startTime, formatter);
 		LocalTime end = LocalTime.parse(endTime, formatter);
 
-		List<String> sessionTimes = new ArrayList<>();
+		List<AvailableAppointmentResponseDTO> sessionTimes = new ArrayList<>();
 		LocalTime current = start;
 		int count = 0;
 
 		while (!current.isAfter(end) && count < capacity) {
-			sessionTimes.add(current.format(formatter));
+			AvailableAppointmentResponseDTO dto = new AvailableAppointmentResponseDTO();
+			dto.setStartTime(current.format(formatter));
+			dto.setEndTime(current.plusMinutes(sessionDurationMinutes).format(formatter));
+			boolean isBooked = appointmentExists(date, slotId, doctorId, current);
+			dto.setIsBooked(isBooked);
+			sessionTimes.add(dto);
 			current = current.plusMinutes(sessionDurationMinutes);
 			count++;
 		}
@@ -433,5 +445,10 @@ public class AppointmentService {
 			throw new AppointmentNotFoundException("appointment with Id " + appointmentId + "not found");
 		}
 		appointmentRepository.deleteById(appointmentId);
+	}
+
+	public boolean appointmentExists(LocalDate date, UUID slotId, UUID doctorId, LocalTime time) {
+		return appointmentRepository.existsByAppointmentDateAndSlotIdAndDoctorIdAndAppointmentTime(date, slotId,
+				doctorId, time);
 	}
 }

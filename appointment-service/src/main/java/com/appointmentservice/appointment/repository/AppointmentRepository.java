@@ -27,4 +27,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID>,
                         LocalDate appointmentDate, LocalTime appointmentTime);
 
         Optional<Appointment> findTopByDoctorIdOrderByRankDesc(UUID doctorId);
+
+        boolean existsByAppointmentDateAndSlotIdAndDoctorIdAndAppointmentTime(LocalDate date, UUID slotId, UUID doctorId,
+                        LocalTime time);
 }
