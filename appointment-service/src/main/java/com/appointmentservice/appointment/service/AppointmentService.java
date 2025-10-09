@@ -307,7 +307,7 @@ public class AppointmentService {
 
 		Specification<Appointment> spec = (root, query, cb) -> cb.and(
 				cb.equal(root.get("patientId"), patientId),
-				root.get("status").in(AppointmentStatus.VISITED, AppointmentStatus.CANCELLED),
+				root.get("status").in(AppointmentStatus.VISITED, AppointmentStatus.CANCELLED, AppointmentStatus.NOT_VISITED),
 				cb.lessThanOrEqualTo(root.get("appointmentDate"), today));
 
 		// If filter params are provided, extend spec
