@@ -72,9 +72,9 @@ public class AppointmentController {
         return ResponseEntity.ok().body(appointmentResponseDTOs);
     }
 
-    @GetMapping("/upcoming/{id}")
+    @GetMapping("/upcoming")
     public ResponseEntity<PaginatedResponseDTO<AppointmentResponseDTO>> getUpcomingAppointments(
-            @PathVariable("id") UUID patientId,
+            @RequestParam(name = "id", required = false) UUID patientId,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size,
             @RequestParam(name = "category", required = false) String category,
@@ -86,9 +86,9 @@ public class AppointmentController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/past/{id}")
+    @GetMapping("/past")
     public ResponseEntity<PaginatedResponseDTO<AppointmentResponseDTO>> getPastAppointments(
-            @PathVariable("id") UUID patientId,
+            @RequestParam(name = "id", required = false) UUID patientId,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size,
             @RequestParam(name = "category", required = false) String category,

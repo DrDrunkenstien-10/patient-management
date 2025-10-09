@@ -264,16 +264,22 @@ public class AppointmentService {
 		Pageable pageable = PageRequest.of(page, size, Sort.by("appointmentDate").ascending());
 		LocalDate today = LocalDate.now();
 
+		// Base specification: upcoming + valid status
 		Specification<Appointment> spec = (root, query, cb) -> cb.and(
-				cb.equal(root.get("patientId"), patientId),
 				root.get("status").in(AppointmentStatus.NOT_VISITED, AppointmentStatus.RESCHEDULED),
 				cb.greaterThanOrEqualTo(root.get("appointmentDate"), today));
 
-		// If filter params are provided, extend spec
+		// ✅ Apply patient filter only if patientId is present
+		if (patientId != null) {
+			spec = spec.and((root, query, cb) -> cb.equal(root.get("patientId"), patientId));
+		}
+
+		// ✅ Add optional category filter
 		if (category != null && value != null) {
 			spec = spec.and(AppointmentSpecification.getAppointmentSpecification(category, value));
 		}
 
+		// Fetch paginated data
 		Page<Appointment> appointments = appointmentRepository.findAll(spec, pageable);
 
 		List<AppointmentResponseDTO> appointmentResponseDTOs = appointments.stream()
@@ -305,25 +311,30 @@ public class AppointmentService {
 		Pageable pageable = PageRequest.of(page, size, Sort.by("appointmentDate").ascending());
 		LocalDate today = LocalDate.now();
 
+		// Base specification: past appointments (<= today) with valid statuses
 		Specification<Appointment> spec = (root, query, cb) -> cb.and(
-				cb.equal(root.get("patientId"), patientId),
-				root.get("status").in(AppointmentStatus.VISITED, AppointmentStatus.CANCELLED, AppointmentStatus.NOT_VISITED),
+				root.get("status").in(AppointmentStatus.VISITED, AppointmentStatus.CANCELLED,
+						AppointmentStatus.NOT_VISITED),
 				cb.lessThanOrEqualTo(root.get("appointmentDate"), today));
 
-		// If filter params are provided, extend spec
+		// ✅ Apply patient filter only if patientId is provided
+		if (patientId != null) {
+			spec = spec.and((root, query, cb) -> cb.equal(root.get("patientId"), patientId));
+		}
+
+		// ✅ Add optional category filter
 		if (category != null && value != null) {
 			spec = spec.and(AppointmentSpecification.getAppointmentSpecification(category, value));
 		}
 
+		// Fetch paginated results
 		Page<Appointment> appointments = appointmentRepository.findAll(spec, pageable);
 
 		List<AppointmentResponseDTO> appointmentResponseDTOs = appointments.stream()
 				.map(appointment -> {
 					SlotDTO slotDTO = slotServiceClient.getSlotById(appointment.getSlotId());
-					PatientDTO patientDTO = patientServiceClient
-							.getPatientById(appointment.getPatientId());
-					DoctorDTO doctorDTO = doctorServiceClient
-							.getDoctorById(appointment.getDoctorId());
+					PatientDTO patientDTO = patientServiceClient.getPatientById(appointment.getPatientId());
+					DoctorDTO doctorDTO = doctorServiceClient.getDoctorById(appointment.getDoctorId());
 					return AppointmentMapper.toDto(appointment, slotDTO, doctorDTO, patientDTO);
 				})
 				.toList();
