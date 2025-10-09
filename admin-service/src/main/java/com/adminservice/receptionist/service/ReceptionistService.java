@@ -26,138 +26,139 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class ReceptionistService {
-    private final ReceptionistRepository receptionistRepository;
-    private final ReceptionistValidator receptionistValidator;
-    private final UserServiceClient userServiceClient;
+        private final ReceptionistRepository receptionistRepository;
+        private final ReceptionistValidator receptionistValidator;
+        private final UserServiceClient userServiceClient;
 
-    public ReceptionistService(ReceptionistRepository receptionistRepository,
-            ReceptionistValidator receptionistValidator, UserServiceClient userServiceClient) {
-        this.receptionistRepository = receptionistRepository;
-        this.receptionistValidator = receptionistValidator;
-        this.userServiceClient = userServiceClient;
-    }
-
-    @Transactional
-    public ReceptionistResponseDTO createReceptionists(ReceptionistRequestDTO receptionistRequestDTO) {
-
-        try {
-            receptionistValidator.validateForCreation(receptionistRequestDTO);
-
-            Receptionist newReceptionist = receptionistRepository
-                    .save(ReceptionistMapper.toModel(receptionistRequestDTO));
-            userServiceClient.createUser(
-                    new UserRequestDTO(receptionistRequestDTO.getContactEmail(),
-                            receptionistRequestDTO.getPassword(), "RECEPTIONIST"));
-
-            return ReceptionistMapper.toDto(newReceptionist);
-        } catch (Exception e) {
-            throw new RuntimeException("Error creating receptionist: " + e.getMessage(), e);
+        public ReceptionistService(ReceptionistRepository receptionistRepository,
+                        ReceptionistValidator receptionistValidator, UserServiceClient userServiceClient) {
+                this.receptionistRepository = receptionistRepository;
+                this.receptionistValidator = receptionistValidator;
+                this.userServiceClient = userServiceClient;
         }
 
-    }
+        @Transactional
+        public ReceptionistResponseDTO createReceptionists(ReceptionistRequestDTO receptionistRequestDTO) {
 
-    // public List<ReceptionistResponseDTO> getReceptionists() {
-    // List<Receptionist> receptionists = receptionistRepository.findAll();
+                try {
+                        receptionistValidator.validateForCreation(receptionistRequestDTO);
 
-    // List<ReceptionistResponseDTO> receptionistResponseDTOs =
-    // receptionists.stream()
-    // .map(receptionist -> ReceptionistMapper.toDto(receptionist)).toList();
+                        Receptionist newReceptionist = receptionistRepository
+                                        .save(ReceptionistMapper.toModel(receptionistRequestDTO));
+                        userServiceClient.createUser(
+                                        new UserRequestDTO(newReceptionist.getReceptionistId().toString(),
+                                                        receptionistRequestDTO.getContactEmail(),
+                                                        receptionistRequestDTO.getPassword(), "RECEPTIONIST"));
 
-    // return receptionistResponseDTOs;
-    // }
+                        return ReceptionistMapper.toDto(newReceptionist);
+                } catch (Exception e) {
+                        throw new RuntimeException("Error creating receptionist: " + e.getMessage(), e);
+                }
 
-    public PaginatedResponseDTO<ReceptionistResponseDTO> getReceptionists(int page, int size, String sortBy) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+        }
 
-        Page<Receptionist> receptionists = receptionistRepository.findAll(pageable);
+        // public List<ReceptionistResponseDTO> getReceptionists() {
+        // List<Receptionist> receptionists = receptionistRepository.findAll();
 
-        List<ReceptionistResponseDTO> receptionistResponseDTOs = receptionists.stream()
-                .map(receptionist -> ReceptionistMapper.toDto(receptionist))
-                .toList();
+        // List<ReceptionistResponseDTO> receptionistResponseDTOs =
+        // receptionists.stream()
+        // .map(receptionist -> ReceptionistMapper.toDto(receptionist)).toList();
 
-        return new PaginatedResponseDTO<>(
-                receptionistResponseDTOs,
-                receptionists.getNumber(),
-                receptionists.getSize(),
-                receptionists.getTotalElements(),
-                receptionists.getTotalPages(),
-                receptionists.isLast(),
-                receptionists.isFirst());
-    }
+        // return receptionistResponseDTOs;
+        // }
 
-    public PaginatedResponseDTO<ReceptionistResponseDTO> filterReceptionists(
-            String category,
-            String value,
-            String direction,
-            int page,
-            int size,
-            String sortBy) {
-        Sort sort = direction.equalsIgnoreCase("desc")
-                ? Sort.by(sortBy).descending()
-                : Sort.by(sortBy).ascending();
+        public PaginatedResponseDTO<ReceptionistResponseDTO> getReceptionists(int page, int size, String sortBy) {
+                Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
 
-        Pageable pageable = PageRequest.of(page, size, sort);
+                Page<Receptionist> receptionists = receptionistRepository.findAll(pageable);
 
-        Specification<Receptionist> spec = ReceptionistSpecification.getReceptionistSpecification(category,
-                value);
+                List<ReceptionistResponseDTO> receptionistResponseDTOs = receptionists.stream()
+                                .map(receptionist -> ReceptionistMapper.toDto(receptionist))
+                                .toList();
 
-        Page<Receptionist> receptionists = receptionistRepository.findAll(spec, pageable);
+                return new PaginatedResponseDTO<>(
+                                receptionistResponseDTOs,
+                                receptionists.getNumber(),
+                                receptionists.getSize(),
+                                receptionists.getTotalElements(),
+                                receptionists.getTotalPages(),
+                                receptionists.isLast(),
+                                receptionists.isFirst());
+        }
 
-        List<ReceptionistResponseDTO> receptionistResponseDTOs = receptionists.stream()
-                .map(receptionist -> ReceptionistMapper.toDto(receptionist))
-                .toList();
+        public PaginatedResponseDTO<ReceptionistResponseDTO> filterReceptionists(
+                        String category,
+                        String value,
+                        String direction,
+                        int page,
+                        int size,
+                        String sortBy) {
+                Sort sort = direction.equalsIgnoreCase("desc")
+                                ? Sort.by(sortBy).descending()
+                                : Sort.by(sortBy).ascending();
 
-        return new PaginatedResponseDTO<>(
-                receptionistResponseDTOs,
-                receptionists.getNumber(),
-                receptionists.getSize(),
-                receptionists.getTotalElements(),
-                receptionists.getTotalPages(),
-                receptionists.isLast(),
-                receptionists.isFirst());
-    }
+                Pageable pageable = PageRequest.of(page, size, sort);
 
-    public ReceptionistResponseDTO getReceptionistById(UUID receptionistId) {
-        Receptionist receptionist = receptionistRepository.findById(receptionistId)
-                .orElseThrow(() -> new ReceptionistNotFoundException(
-                        "Receptionist not found with ID: " + receptionistId));
+                Specification<Receptionist> spec = ReceptionistSpecification.getReceptionistSpecification(category,
+                                value);
 
-        return ReceptionistMapper.toDto(receptionist);
-    }
+                Page<Receptionist> receptionists = receptionistRepository.findAll(spec, pageable);
 
-    public ReceptionistResponseDTO updateReceptionist(UUID receptionistId,
-            ReceptionistRequestDTO receptionistRequestDTO) {
-        Receptionist receptionist = receptionistRepository.findById(receptionistId)
-                .orElseThrow(() -> new ReceptionistNotFoundException(
-                        "Receptionist not found with ID: "
-                                + receptionistRequestDTO.getReceptionistId()));
+                List<ReceptionistResponseDTO> receptionistResponseDTOs = receptionists.stream()
+                                .map(receptionist -> ReceptionistMapper.toDto(receptionist))
+                                .toList();
 
-        receptionistValidator.validateForUpdate(receptionistRequestDTO, receptionistId);
+                return new PaginatedResponseDTO<>(
+                                receptionistResponseDTOs,
+                                receptionists.getNumber(),
+                                receptionists.getSize(),
+                                receptionists.getTotalElements(),
+                                receptionists.getTotalPages(),
+                                receptionists.isLast(),
+                                receptionists.isFirst());
+        }
 
-        receptionist.setName(receptionistRequestDTO.getName());
-        receptionist.setGender(receptionistRequestDTO.getGender());
-        receptionist.setDateOfBirth(receptionistRequestDTO.getDateOfBirth());
-        receptionist.setEmployeeCode(receptionistRequestDTO.getEmployeeCode());
-        receptionist.setDepartment(receptionistRequestDTO.getDepartment());
-        receptionist.setContactEmail(receptionistRequestDTO.getContactEmail());
-        receptionist.setContactPhone(receptionistRequestDTO.getContactPhone());
-        receptionist.setAssignedFacility(receptionistRequestDTO.getAssignedFacility());
-        receptionist.setRoleTitle(receptionistRequestDTO.getRoleTitle());
-        receptionist.setAccessLevel(receptionistRequestDTO.getAccessLevel());
-        receptionist.setLastLogin(receptionistRequestDTO.getLastLogin());
-        receptionist.setStatus(receptionistRequestDTO.getStatus());
+        public ReceptionistResponseDTO getReceptionistById(UUID receptionistId) {
+                Receptionist receptionist = receptionistRepository.findById(receptionistId)
+                                .orElseThrow(() -> new ReceptionistNotFoundException(
+                                                "Receptionist not found with ID: " + receptionistId));
 
-        Receptionist updatedReceptionist = receptionistRepository.save(receptionist);
+                return ReceptionistMapper.toDto(receptionist);
+        }
 
-        return ReceptionistMapper.toDto(updatedReceptionist);
-    }
+        public ReceptionistResponseDTO updateReceptionist(UUID receptionistId,
+                        ReceptionistRequestDTO receptionistRequestDTO) {
+                Receptionist receptionist = receptionistRepository.findById(receptionistId)
+                                .orElseThrow(() -> new ReceptionistNotFoundException(
+                                                "Receptionist not found with ID: "
+                                                                + receptionistRequestDTO.getReceptionistId()));
 
-    @Transactional
-    public void deleteReceptionist(UUID receptionistId) {
-        Receptionist receptionist = receptionistRepository.findById(receptionistId)
-                .orElseThrow(() -> new ReceptionistNotFoundException(
-                        "Receptionist not found with ID: " + receptionistId));
+                receptionistValidator.validateForUpdate(receptionistRequestDTO, receptionistId);
 
-        receptionistRepository.delete(receptionist);
-    }
+                receptionist.setName(receptionistRequestDTO.getName());
+                receptionist.setGender(receptionistRequestDTO.getGender());
+                receptionist.setDateOfBirth(receptionistRequestDTO.getDateOfBirth());
+                receptionist.setEmployeeCode(receptionistRequestDTO.getEmployeeCode());
+                receptionist.setDepartment(receptionistRequestDTO.getDepartment());
+                receptionist.setContactEmail(receptionistRequestDTO.getContactEmail());
+                receptionist.setContactPhone(receptionistRequestDTO.getContactPhone());
+                receptionist.setAssignedFacility(receptionistRequestDTO.getAssignedFacility());
+                receptionist.setRoleTitle(receptionistRequestDTO.getRoleTitle());
+                receptionist.setAccessLevel(receptionistRequestDTO.getAccessLevel());
+                receptionist.setLastLogin(receptionistRequestDTO.getLastLogin());
+                receptionist.setStatus(receptionistRequestDTO.getStatus());
+
+                Receptionist updatedReceptionist = receptionistRepository.save(receptionist);
+
+                return ReceptionistMapper.toDto(updatedReceptionist);
+        }
+
+        @Transactional
+        public void deleteReceptionist(UUID receptionistId) {
+                Receptionist receptionist = receptionistRepository.findById(receptionistId)
+                                .orElseThrow(() -> new ReceptionistNotFoundException(
+                                                "Receptionist not found with ID: " + receptionistId));
+
+                receptionistRepository.delete(receptionist);
+        }
 }

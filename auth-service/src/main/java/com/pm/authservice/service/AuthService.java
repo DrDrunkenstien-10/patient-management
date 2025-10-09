@@ -36,8 +36,9 @@ public class AuthService {
         return userService.findByEmail(dto.getEmail())
                 .filter(u -> passwordEncoder.matches(dto.getPassword(), u.getPassword()))
                 .map(user -> {
-                    String accessToken = jwtUtil.generateAccessToken(user.getEmail(), user.getRole());
-                    String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+                    String accessToken = jwtUtil.generateAccessToken(user.getId().toString(), user.getEmail(),
+                            user.getRole());
+                    String refreshToken = jwtUtil.generateRefreshToken(user.getId().toString(), user.getEmail());
 
                     // Save to DB
                     RefreshToken tokenEntity = new RefreshToken();
@@ -69,6 +70,8 @@ public class AuthService {
             // Step 2: Extract email from token
             String email = jwtUtil.extractEmail(refreshToken);
 
+            String id = jwtUtil.extractId(refreshToken);
+
             // Step 3: Lookup refresh token in DB
             Optional<RefreshToken> storedToken = refreshTokenRepository.findByToken(refreshToken);
 
@@ -84,7 +87,7 @@ public class AuthService {
             }
 
             // Step 5: Generate new access token
-            return Optional.of(jwtUtil.generateAccessToken(email, token.getUser().getRole()));
+            return Optional.of(jwtUtil.generateAccessToken(id, email, token.getUser().getRole()));
 
         } catch (JwtException e) {
             return Optional.empty(); // Invalid or malformed token

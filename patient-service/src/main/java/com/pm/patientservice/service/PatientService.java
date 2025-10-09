@@ -68,7 +68,8 @@ public class PatientService {
 
             // kafkaProducer.sendEvent(newPatient);
             userServiceClient.createUser(
-                    new UserRequestDTO(patientRequestDTO.getEmail(), patientRequestDTO.getPassword(), "PATIENT"));
+                    new UserRequestDTO(newPatient.getPatientId().toString(), patientRequestDTO.getEmail(),
+                            patientRequestDTO.getPassword(), "PATIENT"));
 
             return PatientMapper.toDTO(newPatient);
         } catch (Exception e) {

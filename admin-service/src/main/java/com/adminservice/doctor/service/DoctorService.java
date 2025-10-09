@@ -44,7 +44,8 @@ public class DoctorService {
 
             Doctor newDoctor = doctorRepository.save(DoctorMapper.toModel(doctorRequestDTO));
             userServiceClient.createUser(
-                    new UserRequestDTO(doctorRequestDTO.getContactEmail(), doctorRequestDTO.getPassword(), "DOCTOR"));
+                    new UserRequestDTO(newDoctor.getDoctorId().toString(), doctorRequestDTO.getContactEmail(),
+                            doctorRequestDTO.getPassword(), "DOCTOR"));
 
             return DoctorMapper.toDto(newDoctor);
         } catch (Exception e) {

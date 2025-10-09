@@ -1,6 +1,7 @@
 package com.pm.patientservice.client.dto;
 
 public class UserRequestDTO {
+    private String id;
     private String email;
     private String password;
     private String role;
@@ -8,10 +9,19 @@ public class UserRequestDTO {
     public UserRequestDTO() {
     }
 
-    public UserRequestDTO(String email, String password, String role) {
+    public UserRequestDTO(String id, String email, String password, String role) {
+        this.id = id;
         this.email = email;
         this.password = password;
         this.role = role;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getEmail() {

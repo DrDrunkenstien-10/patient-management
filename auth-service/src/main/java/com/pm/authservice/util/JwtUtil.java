@@ -24,9 +24,10 @@ public class JwtUtil {
         this.secretKey = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateAccessToken(String email, String role) {
+    public String generateAccessToken(String id, String email, String role) {
         return Jwts.builder()
                 .subject(email)
+                .claim("id", id)
                 .claim("role", role)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 15)) // 15 minutes
@@ -34,9 +35,10 @@ public class JwtUtil {
                 .compact();
     }
 
-    public String generateRefreshToken(String email) {
+    public String generateRefreshToken(String id, String email) {
         return Jwts.builder()
                 .subject(email)
+                .claim("id", id)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 7)) // 7 days
                 .signWith(secretKey)
@@ -63,5 +65,14 @@ public class JwtUtil {
                 .parseSignedClaims(token)
                 .getPayload()
                 .getSubject();
+    }
+
+    public String extractId(String token) {
+        return Jwts.parser()
+                .verifyWith((SecretKey) secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("id", String.class);
     }
 }

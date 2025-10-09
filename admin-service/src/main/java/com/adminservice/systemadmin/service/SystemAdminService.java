@@ -33,7 +33,8 @@ public class SystemAdminService {
         try {
             SystemAdmin newSystemAdmin = systemAdminRepository.save(SystemAdminMapper.toModel(systemAdminRequestDTO));
             userServiceClient.createUser(
-                    new UserRequestDTO(systemAdminRequestDTO.getContactEmail(), systemAdminRequestDTO.getPassword(),
+                    new UserRequestDTO(newSystemAdmin.getSystemAdminId().toString(),
+                            systemAdminRequestDTO.getContactEmail(), systemAdminRequestDTO.getPassword(),
                             "SYSTEM_ADMIN"));
             return SystemAdminMapper.toDto(newSystemAdmin);
         } catch (Exception e) {

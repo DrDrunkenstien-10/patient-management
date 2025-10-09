@@ -1,6 +1,9 @@
 package com.pm.authservice.dto;
 
+import java.util.UUID;
+
 public class UserRequestDTO {
+    private UUID id;
     private String email;
     private String password;
     private String role;
@@ -8,7 +11,8 @@ public class UserRequestDTO {
     public UserRequestDTO() {
     }
 
-    public UserRequestDTO(String email, String password, String role) {
+    public UserRequestDTO(UUID id, String email, String password, String role) {
+        this.id = id;
         this.email = email;
         this.password = password;
         this.role = role;
@@ -36,5 +40,13 @@ public class UserRequestDTO {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
     }
 }

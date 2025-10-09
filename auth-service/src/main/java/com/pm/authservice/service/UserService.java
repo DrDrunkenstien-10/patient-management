@@ -24,6 +24,7 @@ public class UserService {
 
     public UserResponseDTO createUser(UserRequestDTO userRequestDTO) {
         User user = new User();
+        user.setId(userRequestDTO.getId());
         user.setEmail(userRequestDTO.getEmail());
         user.setPassword(PasswordHasher.hashPassword(userRequestDTO.getPassword()));
         user.setRole(userRequestDTO.getRole());
