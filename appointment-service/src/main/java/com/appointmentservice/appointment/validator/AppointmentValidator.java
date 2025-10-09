@@ -3,6 +3,7 @@ package com.appointmentservice.appointment.validator;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.Set;
 import java.time.Duration;
 
@@ -13,6 +14,7 @@ import com.appointmentservice.appointment.client.service.DoctorServiceClient;
 import com.appointmentservice.appointment.client.service.PatientServiceClient;
 import com.appointmentservice.appointment.client.service.SlotServiceClient;
 import com.appointmentservice.appointment.dto.AppointmentRequestDTO;
+import com.appointmentservice.appointment.enums.AppointmentStatus;
 import com.appointmentservice.appointment.exception.AppointmentExistsException;
 import com.appointmentservice.appointment.exception.DoctorNotFoundException;
 import com.appointmentservice.appointment.exception.InvalidAppointmentTimeException;
@@ -70,17 +72,23 @@ public class AppointmentValidator {
             throw new InvalidAppointmentTimeException("Appointment time not aligned with slot duration");
         }
 
-        if (appointmentRepository.existsByDoctorIdAndPatientIdAndSlotIdAndAppointmentDate(
+        List<AppointmentStatus> excludedStatuses = List.of(AppointmentStatus.CANCELLED, AppointmentStatus.RESCHEDULED);
+
+        if (appointmentRepository.existsByDoctorIdAndPatientIdAndSlotIdAndAppointmentDateAndStatusNotIn(
                 appointmentRequestDTO.getDoctorId(),
                 appointmentRequestDTO.getPatientId(),
                 appointmentRequestDTO.getSlotId(),
-                appointmentRequestDTO.getAppointmentDate())) {
-            throw new AppointmentExistsException("appointment exists for the doctor at the slot and date");
+                appointmentRequestDTO.getAppointmentDate(),
+                excludedStatuses)) {
+            throw new AppointmentExistsException("Appointment exists for the doctor at this slot and date");
         }
 
-        if (appointmentRepository.existsByDoctorIdAndSlotIdAndAppointmentDateAndAppointmentTime(
-                appointmentRequestDTO.getDoctorId(), appointmentRequestDTO.getSlotId(),
-                appointmentRequestDTO.getAppointmentDate(), time)) {
+        if (appointmentRepository.existsByDoctorIdAndSlotIdAndAppointmentDateAndAppointmentTimeAndStatusNotIn(
+                appointmentRequestDTO.getDoctorId(),
+                appointmentRequestDTO.getSlotId(),
+                appointmentRequestDTO.getAppointmentDate(),
+                time,
+                excludedStatuses)) {
             throw new AppointmentExistsException("This time slot is already booked.");
         }
 

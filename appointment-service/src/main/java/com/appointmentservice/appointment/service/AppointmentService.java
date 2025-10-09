@@ -166,14 +166,22 @@ public class AppointmentService {
 		}
 	}
 
-	public Appointment updateAppointmentIfExistingResheduledOrCancelled(AppointmentRequestDTO appointmentRequestDTO,
-			Appointment existingResheduledOrCancelledAppointment) {
+	public Appointment updateAppointmentIfExistingResheduledOrCancelled(
+			AppointmentRequestDTO appointmentRequestDTO,
+			Appointment existingAppointment) {
 
-		existingResheduledOrCancelledAppointment.setPatientId(appointmentRequestDTO.getPatientId());
-		existingResheduledOrCancelledAppointment.setStatus(AppointmentStatus.NOT_VISITED);
+		// Update all relevant fields
+		existingAppointment.setPatientId(appointmentRequestDTO.getPatientId());
+		existingAppointment.setDoctorId(appointmentRequestDTO.getDoctorId());
+		existingAppointment.setSlotId(appointmentRequestDTO.getSlotId());
+		existingAppointment.setAppointmentDate(appointmentRequestDTO.getAppointmentDate());
+		existingAppointment.setAppointmentTime(appointmentRequestDTO.getAppointmentTime());
 
-		return appointmentRepository.save(existingResheduledOrCancelledAppointment);
+		// Set status back to NOT_VISITED (or whatever is the default for new
+		// appointments)
+		existingAppointment.setStatus(AppointmentStatus.NOT_VISITED);
 
+		return appointmentRepository.save(existingAppointment);
 	}
 
 	public PaginatedResponseDTO<AppointmentResponseDTO> getAppointments(int page, int size,
@@ -411,12 +419,15 @@ public class AppointmentService {
 		return availableTimings;
 	}
 
-	public List<AvailableAppointmentResponseDTO> generateSessionTimes(String startTime, String endTime,
+	public List<AvailableAppointmentResponseDTO> generateSessionTimes(
+			String startTime,
+			String endTime,
 			int capacity,
 			int sessionDurationMinutes,
 			UUID slotId,
 			UUID doctorId,
 			LocalDate date) {
+
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
 		LocalTime start = LocalTime.parse(startTime, formatter);
 		LocalTime end = LocalTime.parse(endTime, formatter);
@@ -429,8 +440,10 @@ public class AppointmentService {
 			AvailableAppointmentResponseDTO dto = new AvailableAppointmentResponseDTO();
 			dto.setStartTime(current.format(formatter));
 			dto.setEndTime(current.plusMinutes(sessionDurationMinutes).format(formatter));
+
 			boolean isBooked = appointmentExists(date, slotId, doctorId, current);
 			dto.setIsBooked(isBooked);
+
 			sessionTimes.add(dto);
 			current = current.plusMinutes(sessionDurationMinutes);
 			count++;
@@ -448,7 +461,16 @@ public class AppointmentService {
 	}
 
 	public boolean appointmentExists(LocalDate date, UUID slotId, UUID doctorId, LocalTime time) {
-		return appointmentRepository.existsByAppointmentDateAndSlotIdAndDoctorIdAndAppointmentTime(date, slotId,
-				doctorId, time);
+		Optional<Appointment> appointmentOpt = appointmentRepository
+				.findByAppointmentDateAndSlotIdAndDoctorIdAndAppointmentTime(date, slotId, doctorId, time);
+
+		if (appointmentOpt.isEmpty()) {
+			return false;
+		}
+
+		AppointmentStatus status = appointmentOpt.get().getStatus();
+
+		// Consider only VISITED or NOT_VISITED as booked
+		return status == AppointmentStatus.VISITED || status == AppointmentStatus.NOT_VISITED;
 	}
 }

@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+import com.appointmentservice.appointment.enums.AppointmentStatus;
 import com.appointmentservice.appointment.model.Appointment;
 
 public interface AppointmentRepository extends JpaRepository<Appointment, UUID>, JpaSpecificationExecutor<Appointment> {
@@ -17,17 +18,28 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID>,
 
         Optional<Appointment> findTop1ByDoctorIdAndSlotIdOrderByRankDesc(UUID doctorId, UUID slotId);
 
-        boolean existsByDoctorIdAndPatientIdAndSlotIdAndAppointmentDate(UUID doctorId, UUID slotId,
+        // Ignore CANCELLED and RESCHEDULED appointments
+        boolean existsByDoctorIdAndPatientIdAndSlotIdAndAppointmentDateAndStatusNotIn(
+                        UUID doctorId,
                         UUID patientId,
-                        LocalDate appointmentDate);
+                        UUID slotId,
+                        LocalDate date,
+                        List<AppointmentStatus> excludedStatuses);
 
-        boolean existsByAppointmentId(UUID appointmentId);
-
-        boolean existsByDoctorIdAndSlotIdAndAppointmentDateAndAppointmentTime(UUID doctorId, UUID slotId,
-                        LocalDate appointmentDate, LocalTime appointmentTime);
+        boolean existsByDoctorIdAndSlotIdAndAppointmentDateAndAppointmentTimeAndStatusNotIn(
+                        UUID doctorId,
+                        UUID slotId,
+                        LocalDate date,
+                        LocalTime time,
+                        List<AppointmentStatus> excludedStatuses);
 
         Optional<Appointment> findTopByDoctorIdOrderByRankDesc(UUID doctorId);
 
-        boolean existsByAppointmentDateAndSlotIdAndDoctorIdAndAppointmentTime(LocalDate date, UUID slotId, UUID doctorId,
+        boolean existsByAppointmentDateAndSlotIdAndDoctorIdAndAppointmentTime(LocalDate date, UUID slotId,
+                        UUID doctorId,
                         LocalTime time);
+
+        Optional<Appointment> findByAppointmentDateAndSlotIdAndDoctorIdAndAppointmentTime(
+                        LocalDate date, UUID slotId, UUID doctorId, LocalTime time);
+
 }
